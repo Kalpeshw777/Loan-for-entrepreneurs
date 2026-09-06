@@ -1097,13 +1097,8 @@ export default function WizardPage() {
                             : "Select state first"}
                         </option>
 
-                        {(
-                          LOCATIONS.find(
-                            (location) =>
-                              location.state ===
-                              data.state
-                          )?.districts || []
-                        ).map((district) => (
+                        {(LOCATIONS[data.state] ?? []).map(
+  (district) => (
                           <option
                             key={district}
                             value={district}
