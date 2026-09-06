@@ -205,6 +205,7 @@ function getActivityForPurpose(
     cost: 300000,
   };
 }
+
 export default function WizardPage() {
   const router = useRouter();
   const { profile, setJourney } = useJourney();
@@ -639,24 +640,25 @@ export default function WizardPage() {
   const currentStep = STEPS[step];
 
   return (
-    <main className="min-h-screen bg-[#F7F9FC] text-[#111827]">
+    <main className="min-h-screen bg-[#F7F9FC] text-[#111827] dark:bg-[#0B1118] dark:text-[#F1F5F9]">
 
       {/* =====================================================
           PAGE HEADER
           ===================================================== */}
-      <section className="border-b border-[#DCE4EC] bg-white">
+      <section className="border-b border-[#DCE4EC] bg-white dark:border-[#263445] dark:bg-[#0F1722]">
         <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+
             <div>
               <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#1769D2]">
                 NIRVAAN
               </p>
 
-              <h1 className="mt-2 text-3xl font-black tracking-tight text-[#102A43] sm:text-4xl">
+              <h1 className="mt-2 text-3xl font-black tracking-tight text-[#102A43] dark:text-white sm:text-4xl">
                 Start My Journey
               </h1>
 
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[#607086]">
+              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[#607086] dark:text-[#A8B5C5]">
                 Complete verification and provide your
                 financial or assessment details so NIRVAAN
                 can guide you toward suitable government
@@ -665,15 +667,16 @@ export default function WizardPage() {
             </div>
 
             <div className="border-l-2 border-[#F47B20] pl-4">
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#7A8797]">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#7A8797] dark:text-[#94A3B8]">
                 Current stage
               </p>
 
-              <p className="mt-1 text-sm font-extrabold text-[#102A43]">
+              <p className="mt-1 text-sm font-extrabold text-[#102A43] dark:text-white">
                 {currentStep.number}{" "}
                 {currentStep.title}
               </p>
             </div>
+
           </div>
         </div>
       </section>
@@ -681,32 +684,36 @@ export default function WizardPage() {
       {/* =====================================================
           JOURNEY STEPPER
           ===================================================== */}
-      <section className="border-b border-[#DCE4EC] bg-white">
+      <section className="border-b border-[#DCE4EC] bg-white dark:border-[#263445] dark:bg-[#0F1722]">
         <div className="mx-auto max-w-7xl px-5 py-5 sm:px-8 lg:px-10">
-          <div className="grid gap-px border border-[#D5DEE8] bg-[#D5DEE8] md:grid-cols-5">
+
+          <div className="grid gap-px border border-[#D5DEE8] bg-[#D5DEE8] dark:border-[#263445] dark:bg-[#263445] md:grid-cols-5">
+
             {STEPS.map((item, index) => {
               const active =
                 index === step;
+
               const completed =
                 index < step;
 
               return (
                 <div
                   key={item.number}
-                  className={`relative bg-white px-4 py-4 ${
+                  className={`relative bg-white px-4 py-4 dark:bg-[#111923] ${
                     active
-                      ? "bg-[#F8FBFF]"
+                      ? "bg-[#F8FBFF] dark:bg-[#132033]"
                       : ""
                   }`}
                 >
                   <div className="flex items-start gap-3">
+
                     <span
                       className={`flex h-8 w-8 flex-none items-center justify-center border text-[10px] font-black ${
                         active
                           ? "border-[#1769D2] bg-[#1769D2] text-white"
                           : completed
                             ? "border-[#0E2A4A] bg-[#0E2A4A] text-white"
-                            : "border-[#C9D5E1] bg-white text-[#708095]"
+                            : "border-[#C9D5E1] bg-white text-[#708095] dark:border-[#405064] dark:bg-[#17212D] dark:text-[#A8B5C5]"
                       }`}
                     >
                       {completed
@@ -715,24 +722,27 @@ export default function WizardPage() {
                     </span>
 
                     <div className="min-w-0">
+
                       <p
                         className={`text-xs font-extrabold ${
                           active
                             ? "text-[#1769D2]"
-                            : "text-[#334A61]"
+                            : "text-[#334A61] dark:text-[#D5DEE8]"
                         }`}
                       >
                         {item.title}
                       </p>
 
-                      <p className="mt-1 hidden text-[10px] font-medium leading-4 text-[#7A8797] lg:block">
+                      <p className="mt-1 hidden text-[10px] font-medium leading-4 text-[#7A8797] dark:text-[#94A3B8] lg:block">
                         {item.description}
                       </p>
+
                     </div>
                   </div>
                 </div>
               );
             })}
+
           </div>
         </div>
       </section>
@@ -742,31 +752,29 @@ export default function WizardPage() {
           ===================================================== */}
       <section className="px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
         <div className="mx-auto max-w-7xl">
-          <div className="border border-[#CBD5E1] bg-white">
-                      {/* =====================================================
-              STEP 01: VERIFICATION
-              ===================================================== */}
-          {step === 0 ? (
+
+          <div className="border border-[#CBD5E1] bg-white dark:border-[#263445] dark:bg-[#111923]">
+
+            {/* =====================================================
+                STEP 01: VERIFICATION
+                ===================================================== */}
+                      {step === 0 ? (
             <div>
-              <div className="border-b border-[#DCE4EC] px-5 py-5 sm:px-7">
+              <div className="border-b border-[#DCE4EC] px-5 py-5 sm:px-7 dark:border-[#263445]">
                 <div className="flex items-start gap-4">
                   <span className="flex h-10 w-10 flex-none items-center justify-center bg-[#1769D2] text-xs font-black text-white">
                     01
                   </span>
 
                   <div>
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#1769D2]">
+                    <h2 className="text-xl font-black text-[#102A43] dark:text-white">
                       Verification
-                    </p>
-
-                    <h2 className="mt-1 text-xl font-black text-[#102A43]">
-                      Verify your identity
                     </h2>
 
-                    <p className="mt-1 text-xs font-medium leading-5 text-[#64748B]">
-                      Complete DigiLocker OTP verification and
-                      link either Aadhaar or PAN for identity
-                      verification.
+                    <p className="mt-1 text-sm leading-6 text-[#64748B] dark:text-[#A8B5C5]">
+                      Verify your identity and establish the
+                      basic information required to begin your
+                      assistance journey.
                     </p>
                   </div>
                 </div>
@@ -774,173 +782,260 @@ export default function WizardPage() {
 
               <div className="space-y-7 p-5 sm:p-7">
 
-                {/* DigiLocker */}
-                <div className="border border-[#CBD5E1]">
-                  <div className="border-b border-[#CBD5E1] bg-[#F8FAFC] px-5 py-4">
-                    <p className="text-xs font-extrabold text-[#102A43]">
-                      DigiLocker OTP
-                    </p>
+                {/* =====================================================
+                    IDENTITY VERIFICATION
+                    ===================================================== */}
+                <div className="border border-[#CBD5E1] dark:border-[#344457]">
 
-                    <p className="mt-1 text-[11px] font-medium leading-5 text-[#64748B]">
-                      Use the OTP verification step to confirm
-                      access to your identity information.
+                  <div className="border-b border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                    <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                      Identity Verification
+                    </h3>
+
+                    <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                      Choose a verification method and enter
+                      the required details.
                     </p>
                   </div>
 
-                  <div className="p-5">
-                    <div className="grid gap-5 md:grid-cols-2">
+                  <div className="space-y-6 p-5">
 
-                      <div>
-                        <label
-                          htmlFor="verification-method"
-                          className="mb-2 block text-xs font-bold text-[#334155]"
-                        >
-                          Verification document
-                        </label>
+                    <div>
+                      <label className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]">
+                        Verification Method
+                      </label>
 
-                        <select
-                          id="verification-method"
-                          value={data.verificationMethod}
-                          onChange={(event) =>
-                            update(
-                              "verificationMethod",
-                              event.target.value as VerificationMethod
-                            )
-                          }
-                          className="min-h-12 w-full border border-[#C8D4E1] bg-white px-3 text-sm text-[#1F2937] outline-none focus:border-[#1769D2]"
+                      <div className="grid gap-3 sm:grid-cols-2">
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setData((current) => ({
+                              ...current,
+                              verificationMethod:
+                                "aadhaar",
+                              verificationValue: "",
+                              otp: "",
+                              otpSent: false,
+                              verificationComplete:
+                                false,
+                            }));
+
+                            resetMessages();
+                          }}
+                          className={`border px-4 py-4 text-left transition ${
+                            data.verificationMethod ===
+                            "aadhaar"
+                              ? "border-[#1769D2] bg-[#F0F7FF] dark:border-[#1769D2] dark:bg-[#132033]"
+                              : "border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
+                          }`}
                         >
-                          <option value="aadhaar">
+                          <p className="text-sm font-extrabold text-[#102A43] dark:text-white">
                             Aadhaar
-                          </option>
+                          </p>
 
-                          <option value="pan">
-                            PAN
-                          </option>
-                        </select>
-                      </div>
+                          <p className="mt-1 text-xs text-[#64748B] dark:text-[#A8B5C5]">
+                            Verify using your Aadhaar
+                            number.
+                          </p>
+                        </button>
 
-                      <div>
-                        <label
-                          htmlFor="verification-value"
-                          className="mb-2 block text-xs font-bold text-[#334155]"
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setData((current) => ({
+                              ...current,
+                              verificationMethod:
+                                "pan",
+                              verificationValue: "",
+                              otp: "",
+                              otpSent: false,
+                              verificationComplete:
+                                false,
+                            }));
+
+                            resetMessages();
+                          }}
+                          className={`border px-4 py-4 text-left transition ${
+                            data.verificationMethod ===
+                            "pan"
+                              ? "border-[#1769D2] bg-[#F0F7FF] dark:border-[#1769D2] dark:bg-[#132033]"
+                              : "border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
+                          }`}
                         >
-                          {data.verificationMethod ===
-                          "aadhaar"
-                            ? "Aadhaar number"
-                            : "PAN number"}
-                        </label>
+                          <p className="text-sm font-extrabold text-[#102A43] dark:text-white">
+                            PAN
+                          </p>
 
-                        <input
-                          id="verification-value"
-                          type="text"
-                          inputMode={
-                            data.verificationMethod ===
-                            "aadhaar"
-                              ? "numeric"
-                              : "text"
-                          }
-                          value={data.verificationValue}
-                          onChange={(event) =>
-                            update(
-                              "verificationValue",
-                              event.target.value
-                            )
-                          }
-                          placeholder={
-                            data.verificationMethod ===
-                            "aadhaar"
-                              ? "Enter Aadhaar number"
-                              : "Enter PAN number"
-                          }
-                          className="min-h-12 w-full border border-[#C8D4E1] bg-white px-3 text-sm uppercase text-[#1F2937] outline-none placeholder:normal-case placeholder:text-[#94A3B8] focus:border-[#1769D2]"
-                        />
+                          <p className="mt-1 text-xs text-[#64748B] dark:text-[#A8B5C5]">
+                            Verify using your PAN
+                            details.
+                          </p>
+                        </button>
+
                       </div>
-
                     </div>
 
-                    <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
-                      <div className="flex-1">
+                    <div>
+                      <label
+                        htmlFor="verificationValue"
+                        className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                      >
+                        {data.verificationMethod ===
+                        "aadhaar"
+                          ? "Aadhaar Number"
+                          : "PAN Number"}
+                      </label>
+
+                      <input
+                        id="verificationValue"
+                        type="text"
+                        value={
+                          data.verificationValue
+                        }
+                        onChange={(
+                          event: ChangeEvent<HTMLInputElement>
+                        ) =>
+                          setData((current) => ({
+                            ...current,
+                            verificationValue:
+                              event.target.value,
+                            verificationComplete:
+                              false,
+                            otpSent: false,
+                          }))
+                        }
+                        placeholder={
+                          data.verificationMethod ===
+                          "aadhaar"
+                            ? "Enter 12-digit Aadhaar number"
+                            : "Enter PAN number"
+                        }
+                        disabled={
+                          data.verificationComplete
+                        }
+                        className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] disabled:bg-[#F1F5F9] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B] dark:disabled:bg-[#17212D]"
+                      />
+
+                      <p className="mt-2 text-[11px] leading-5 text-[#64748B] dark:text-[#94A3B8]">
+                        Your verification information is
+                        used only to establish your basic
+                        profile for the assistance journey.
+                      </p>
+                    </div>
+
+                    {!data.verificationComplete ? (
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+
+                        <button
+                          type="button"
+                          onClick={sendOtp}
+                          disabled={
+                            sendingOtp ||
+                            !data.verificationValue.trim()
+                          }
+                          className="border border-[#1769D2] bg-[#1769D2] px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-white transition hover:bg-[#0F5DBD] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {sendingOtp
+                            ? "Sending..."
+                            : data.otpSent
+                              ? "Resend OTP"
+                              : "Send OTP"}
+                        </button>
+
+                        {data.otpSent ? (
+                          <span className="text-xs font-medium text-[#64748B] dark:text-[#A8B5C5]">
+                            OTP sent. Enter the
+                            verification code below.
+                          </span>
+                        ) : null}
+
+                      </div>
+                    ) : null}
+
+                    {data.otpSent &&
+                    !data.verificationComplete ? (
+                      <div>
                         <label
                           htmlFor="otp"
-                          className="mb-2 block text-xs font-bold text-[#334155]"
+                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
                         >
                           OTP
                         </label>
 
-                        <input
-                          id="otp"
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={6}
-                          value={data.otp}
-                          onChange={(event) =>
-                            update(
-                              "otp",
-                              event.target.value.replace(
-                                /\D/g,
-                                ""
-                              )
-                            )
-                          }
-                          placeholder="Enter OTP"
-                          disabled={!data.otpSent}
-                          className="min-h-12 w-full border border-[#C8D4E1] bg-white px-3 text-sm text-[#1F2937] outline-none placeholder:text-[#94A3B8] focus:border-[#1769D2] disabled:bg-[#F1F5F9]"
-                        />
-                      </div>
+                        <div className="flex flex-col gap-3 sm:flex-row">
+                          <input
+                            id="otp"
+                            type="text"
+                            inputMode="numeric"
+                            value={data.otp}
+                            onChange={(
+                              event: ChangeEvent<HTMLInputElement>
+                            ) =>
+                              setData((current) => ({
+                                ...current,
+                                otp: event.target.value,
+                              }))
+                            }
+                            placeholder="Enter OTP"
+                            className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                          />
 
-                      {!data.otpSent ? (
-                        <button
-                          type="button"
-                          onClick={sendOtp}
-                          className="min-h-12 border border-[#1769D2] bg-[#1769D2] px-6 text-xs font-extrabold text-white transition-colors hover:bg-[#0F56AE]"
-                        >
-                          Request OTP
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={verifyOtp}
-                          disabled={
-                            data.verificationComplete
-                          }
-                          className="min-h-12 border border-[#0E2A4A] bg-[#0E2A4A] px-6 text-xs font-extrabold text-white transition-colors hover:bg-[#173A5A] disabled:cursor-not-allowed disabled:bg-[#64748B]"
-                        >
-                          {data.verificationComplete
-                            ? "Verified"
-                            : "Verify OTP"}
-                        </button>
-                      )}
-                    </div>
+                          <button
+                            type="button"
+                            onClick={verifyOtp}
+                            disabled={
+                              verifyingOtp ||
+                              !data.otp.trim()
+                            }
+                            className="border border-[#0E2A4A] bg-[#0E2A4A] px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-white transition hover:bg-[#16395F] disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {verifyingOtp
+                              ? "Verifying..."
+                              : "Verify"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
 
                     {data.verificationComplete ? (
-                      <div className="mt-4 border-l-2 border-[#16804A] bg-[#F0FDF4] px-4 py-3">
-                        <p className="text-xs font-bold text-[#166534]">
-                          Identity verification completed.
+                      <div className="border border-[#86B99A] bg-[#ECF8F0] px-4 py-4 dark:border-[#28633C] dark:bg-[#10271A]">
+                        <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#176B37] dark:text-[#7BE2A0]">
+                          Verification Complete
+                        </p>
+
+                        <p className="mt-1 text-sm text-[#315B42] dark:text-[#B7E5C6]">
+                          Your identity verification has
+                          been completed successfully.
                         </p>
                       </div>
                     ) : null}
+
                   </div>
                 </div>
 
-                {/* Basic Details */}
-                <div>
-                  <div className="mb-4">
-                    <p className="text-sm font-extrabold text-[#102A43]">
-                      Basic details
-                    </p>
+                {/* =====================================================
+                    BASIC DETAILS
+                    ===================================================== */}
+                <div className="border border-[#CBD5E1] dark:border-[#344457]">
 
-                    <p className="mt-1 text-xs font-medium text-[#718096]">
-                      These details help establish your
-                      assistance profile.
+                  <div className="border-b border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                    <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                      Basic Details
+                    </h3>
+
+                    <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                      Provide your location, category and
+                      age information.
                     </p>
                   </div>
 
-                  <div className="grid gap-5 md:grid-cols-2">
+                  <div className="grid gap-6 p-5 md:grid-cols-2">
 
                     <div>
                       <label
                         htmlFor="state"
-                        className="mb-2 block text-xs font-bold text-[#334155]"
+                        className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
                       >
                         State
                       </label>
@@ -948,63 +1043,28 @@ export default function WizardPage() {
                       <select
                         id="state"
                         value={data.state}
-                        onChange={(event) => {
-                          update(
-                            "state",
-                            event.target.value
-                          );
-                          update("district", "");
-                        }}
-                        className="min-h-12 w-full border border-[#C8D4E1] bg-white px-3 text-sm text-[#1F2937] outline-none focus:border-[#1769D2]"
+                        onChange={(
+                          event: ChangeEvent<HTMLSelectElement>
+                        ) =>
+                          setData((current) => ({
+                            ...current,
+                            state: event.target.value,
+                            district: "",
+                          }))
+                        }
+                        className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
                       >
                         <option value="">
                           Select state
                         </option>
 
-                        {stateList.map((state) => (
-                          <option
-                            key={state}
-                            value={state}
-                          >
-                            {state}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="district"
-                        className="mb-2 block text-xs font-bold text-[#334155]"
-                      >
-                        District
-                      </label>
-
-                      <select
-                        id="district"
-                        value={data.district}
-                        onChange={(event) =>
-                          update(
-                            "district",
-                            event.target.value
-                          )
-                        }
-                        disabled={!data.state}
-                        className="min-h-12 w-full border border-[#C8D4E1] bg-white px-3 text-sm text-[#1F2937] outline-none focus:border-[#1769D2] disabled:bg-[#F1F5F9]"
-                      >
-                        <option value="">
-                          {data.state
-                            ? "Select district"
-                            : "Select state first"}
-                        </option>
-
-                        {districtList.map(
-                          (district) => (
+                        {LOCATIONS.map(
+                          (location) => (
                             <option
-                              key={district}
-                              value={district}
+                              key={location.state}
+                              value={location.state}
                             >
-                              {district}
+                              {location.state}
                             </option>
                           )
                         )}
@@ -1013,8 +1073,54 @@ export default function WizardPage() {
 
                     <div>
                       <label
+                        htmlFor="district"
+                        className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                      >
+                        District
+                      </label>
+
+                      <select
+                        id="district"
+                        value={data.district}
+                        disabled={!data.state}
+                        onChange={(
+                          event: ChangeEvent<HTMLSelectElement>
+                        ) =>
+                          setData((current) => ({
+                            ...current,
+                            district:
+                              event.target.value,
+                          }))
+                        }
+                        className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] disabled:bg-[#F1F5F9] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:disabled:bg-[#17212D]"
+                      >
+                        <option value="">
+                          {data.state
+                            ? "Select district"
+                            : "Select state first"}
+                        </option>
+
+                        {(
+                          LOCATIONS.find(
+                            (location) =>
+                              location.state ===
+                              data.state
+                          )?.districts || []
+                        ).map((district) => (
+                          <option
+                            key={district}
+                            value={district}
+                          >
+                            {district}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label
                         htmlFor="category"
-                        className="mb-2 block text-xs font-bold text-[#334155]"
+                        className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
                       >
                         Category
                       </label>
@@ -1022,25 +1128,29 @@ export default function WizardPage() {
                       <select
                         id="category"
                         value={data.category}
-                        onChange={(event) =>
-                          update(
-                            "category",
-                            event.target.value as FormData["category"]
-                          )
+                        onChange={(
+                          event: ChangeEvent<HTMLSelectElement>
+                        ) =>
+                          setData((current) => ({
+                            ...current,
+                            category:
+                              event.target
+                                .value as FormData["category"],
+                          }))
                         }
-                        className="min-h-12 w-full border border-[#C8D4E1] bg-white px-3 text-sm text-[#1F2937] outline-none focus:border-[#1769D2]"
+                        className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
                       >
                         <option value="">
                           Select category
                         </option>
 
                         {CATEGORY_OPTIONS.map(
-                          (option) => (
+                          (category) => (
                             <option
-                              key={option.value}
-                              value={option.value}
+                              key={category.value}
+                              value={category.value}
                             >
-                              {option.label}
+                              {category.label}
                             </option>
                           )
                         )}
@@ -1050,7 +1160,7 @@ export default function WizardPage() {
                     <div>
                       <label
                         htmlFor="age"
-                        className="mb-2 block text-xs font-bold text-[#334155]"
+                        className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
                       >
                         Age
                       </label>
@@ -1058,77 +1168,89 @@ export default function WizardPage() {
                       <input
                         id="age"
                         type="number"
-                        min="18"
+                        min="1"
                         max="100"
                         value={data.age}
-                        onChange={(event) =>
-                          update(
-                            "age",
-                            event.target.value
-                          )
+                        onChange={(
+                          event: ChangeEvent<HTMLInputElement>
+                        ) =>
+                          setData((current) => ({
+                            ...current,
+                            age: event.target.value,
+                          }))
                         }
                         placeholder="Enter your age"
-                        className="min-h-12 w-full border border-[#C8D4E1] bg-white px-3 text-sm text-[#1F2937] outline-none placeholder:text-[#94A3B8] focus:border-[#1769D2]"
+                        className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
                       />
                     </div>
 
                   </div>
                 </div>
 
-                {/* Information Notice */}
-                <div className="border-l-2 border-[#F47B20] bg-[#FFF7ED] px-4 py-4">
-                  <p className="text-xs font-extrabold text-[#9A4D08]">
-                    Verification is the first step.
+                {/* =====================================================
+                    INFORMATION NOTICE
+                    ===================================================== */}
+                <div className="border border-[#E9B36A] bg-[#FFF8EC] px-5 py-4 dark:border-[#8A5A1E] dark:bg-[#2A1D0D]">
+                  <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#A65A00] dark:text-[#F5B45B]">
+                    Important
                   </p>
 
-                  <p className="mt-1 text-[11px] font-medium leading-5 text-[#7C5A32]">
-                    Your verified details are used to
-                    establish the profile that will be
-                    passed to the scheme matching stage.
+                  <p className="mt-1 text-sm leading-6 text-[#76511F] dark:text-[#E5C58F]">
+                    Please ensure that the information
+                    provided above is accurate. It will be
+                    used to determine the appropriate
+                    assistance journey and scheme options.
                   </p>
                 </div>
-              </div>
 
-              {/* Step controls */}
-              <div className="flex justify-end border-t border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 sm:px-7">
-                <button
-                  type="button"
-                  onClick={nextStep}
-                  className="min-h-12 border border-[#0758C7] bg-[#0758C7] px-7 text-xs font-extrabold text-white transition-colors hover:bg-[#064CA9]"
-                >
-                  Continue to Earning Status
-                  <span className="ml-3">
-                    →
-                  </span>
-                </button>
+                {/* =====================================================
+                    STEP CONTROL
+                    ===================================================== */}
+                <div className="flex flex-col gap-3 border-t border-[#DCE4EC] bg-[#F8FAFC] px-5 py-5 dark:border-[#263445] dark:bg-[#17212D] sm:flex-row sm:items-center sm:justify-between">
+
+                  <button
+                    type="button"
+                    onClick={previousStep}
+                    disabled={step === 0}
+                    className="border border-[#CBD5E1] bg-white px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] transition hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#344457] dark:bg-[#0F1722] dark:text-[#CBD5E1] dark:hover:bg-[#1A2633]"
+                  >
+                    Back
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={nextStep}
+                    className="border border-[#1769D2] bg-[#1769D2] px-6 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-white transition hover:bg-[#0F5DBD]"
+                  >
+                    Continue to Earning Status
+                  </button>
+
+                </div>
+
               </div>
             </div>
           ) : null}
 
-                    {/* =====================================================
+          {/* =====================================================
               STEP 02: EARNING STATUS
               ===================================================== */}
-          {step === 1 ? (
+                      {step === 1 ? (
             <div>
-              <div className="border-b border-[#DCE4EC] px-5 py-5 sm:px-7">
+              <div className="border-b border-[#DCE4EC] px-5 py-5 sm:px-7 dark:border-[#263445]">
                 <div className="flex items-start gap-4">
                   <span className="flex h-10 w-10 flex-none items-center justify-center bg-[#1769D2] text-xs font-black text-white">
                     02
                   </span>
 
                   <div>
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#1769D2]">
+                    <h2 className="text-xl font-black text-[#102A43] dark:text-white">
                       Earning Status
-                    </p>
-
-                    <h2 className="mt-1 text-xl font-black text-[#102A43]">
-                      Understand your financial route
                     </h2>
 
-                    <p className="mt-1 text-xs font-medium leading-5 text-[#64748B]">
-                      Tell us whether you are currently
-                      earning or non-earning so the next
-                      assessment route can be selected.
+                    <p className="mt-1 text-sm leading-6 text-[#64748B] dark:text-[#A8B5C5]">
+                      Establish whether you are earning or
+                      non-earning and complete the relevant
+                      assessment route.
                     </p>
                   </div>
                 </div>
@@ -1136,541 +1258,575 @@ export default function WizardPage() {
 
               <div className="space-y-7 p-5 sm:p-7">
 
-                {/* Earning status */}
-                <div>
-                  <p className="mb-4 text-sm font-extrabold text-[#102A43]">
-                    Current earning status
-                  </p>
+                {/* =====================================================
+                    EARNING STATUS
+                    ===================================================== */}
+                <div className="border border-[#CBD5E1] dark:border-[#344457]">
 
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="border-b border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                    <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                      Current Earning Status
+                    </h3>
+
+                    <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                      Select the option that best describes
+                      your current financial situation.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4 p-5 sm:grid-cols-2">
+
                     <button
                       type="button"
                       onClick={() =>
-                        selectEarningStatus(
-                          "earning"
-                        )
+                        setData((current) => ({
+                          ...current,
+                          earningStatus:
+                            "earning",
+                          assessmentPurpose:
+                            "",
+                          purpose: undefined,
+                        }))
                       }
-                      className={`border p-5 text-left transition-colors ${
+                      className={`border px-5 py-5 text-left transition ${
                         data.earningStatus ===
                         "earning"
-                          ? "border-[#1769D2] bg-[#F3F8FF]"
-                          : "border-[#CBD5E1] bg-white hover:border-[#94A3B8]"
+                          ? "border-[#1769D2] bg-[#F0F7FF] dark:border-[#1769D2] dark:bg-[#132033]"
+                          : "border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
                       }`}
                     >
-                      <p className="text-sm font-extrabold text-[#102A43]">
-                        I am earning
+                      <p className="text-sm font-black text-[#102A43] dark:text-white">
+                        Earning
                       </p>
 
-                      <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
-                        I currently have an income and
-                        can provide the required financial
-                        proof.
+                      <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                        I currently have an income or
+                        earning source.
                       </p>
                     </button>
 
                     <button
                       type="button"
                       onClick={() =>
-                        selectEarningStatus(
-                          "non-earning"
-                        )
+                        setData((current) => ({
+                          ...current,
+                          earningStatus:
+                            "non-earning",
+                          annualIncome: "",
+                        }))
                       }
-                      className={`border p-5 text-left transition-colors ${
+                      className={`border px-5 py-5 text-left transition ${
                         data.earningStatus ===
                         "non-earning"
-                          ? "border-[#1769D2] bg-[#F3F8FF]"
-                          : "border-[#CBD5E1] bg-white hover:border-[#94A3B8]"
+                          ? "border-[#1769D2] bg-[#F0F7FF] dark:border-[#1769D2] dark:bg-[#132033]"
+                          : "border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
                       }`}
                     >
-                      <p className="text-sm font-extrabold text-[#102A43]">
-                        I am non-earning
+                      <p className="text-sm font-black text-[#102A43] dark:text-white">
+                        Non-Earning
                       </p>
 
-                      <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
-                        I currently do not earn and need
-                        an assessment route based on my
-                        requirement.
+                      <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                        I currently do not have an
+                        earning source.
                       </p>
                     </button>
+
                   </div>
                 </div>
 
-                {/* Earning route */}
+                {/* =====================================================
+                    EARNING ROUTE
+                    ===================================================== */}
                 {data.earningStatus ===
                 "earning" ? (
-                  <div className="border border-[#CBD5E1]">
-                    <div className="border-b border-[#CBD5E1] bg-[#F8FAFC] px-5 py-4">
-                      <p className="text-xs font-extrabold text-[#102A43]">
-                        Income details
-                      </p>
+                  <div className="border border-[#CBD5E1] dark:border-[#344457]">
 
-                      <p className="mt-1 text-[11px] font-medium leading-5 text-[#64748B]">
-                        Provide your annual family income
-                        and upload the required bank income
-                        proof.
+                    <div className="border-b border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                      <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                        Income Details
+                      </h3>
+
+                      <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                        Provide your annual income and
+                        relevant financial information.
                       </p>
                     </div>
 
-                    <div className="grid gap-5 p-5 md:grid-cols-2">
+                    <div className="space-y-6 p-5">
 
                       <div>
                         <label
-                          htmlFor="annual-income"
-                          className="mb-2 block text-xs font-bold text-[#334155]"
+                          htmlFor="annualIncome"
+                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
                         >
-                          Annual family income
+                          Annual Income
                         </label>
 
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-[#64748B]">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[#64748B] dark:text-[#94A3B8]">
                             ₹
                           </span>
 
                           <input
-                            id="annual-income"
+                            id="annualIncome"
                             type="number"
                             min="0"
                             value={
                               data.annualIncome
                             }
-                            onChange={(event) =>
-                              update(
-                                "annualIncome",
-                                event.target.value
+                            onChange={(
+                              event: ChangeEvent<HTMLInputElement>
+                            ) =>
+                              setData(
+                                (current) => ({
+                                  ...current,
+                                  annualIncome:
+                                    event.target
+                                      .value,
+                                })
                               )
                             }
                             placeholder="Enter annual income"
-                            className="min-h-12 w-full border border-[#C8D4E1] bg-white pl-8 pr-3 text-sm text-[#1F2937] outline-none placeholder:text-[#94A3B8] focus:border-[#1769D2]"
+                            className="w-full border border-[#C8D4E1] bg-white py-3 pl-9 pr-4 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
                           />
                         </div>
 
-                        {data.annualIncome ? (
-                          <p className="mt-2 text-[11px] font-bold text-[#64748B]">
-                            {formatINR(
-                              Number(
-                                data.annualIncome
-                              ) || 0
-                            )}
-                          </p>
-                        ) : null}
+                        <p className="mt-2 text-[11px] leading-5 text-[#64748B] dark:text-[#94A3B8]">
+                          Enter your approximate total
+                          annual income in Indian Rupees.
+                        </p>
                       </div>
 
                       <div>
                         <label
-                          htmlFor="income-proof"
-                          className="mb-2 block text-xs font-bold text-[#334155]"
+                          htmlFor="incomeProof"
+                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
                         >
-                          Bank income proof
+                          Income Proof
                         </label>
 
                         <input
-                          id="income-proof"
+                          id="incomeProof"
                           type="file"
-                          accept="application/pdf,.pdf"
-                          onChange={onFileChange}
-                          className="block min-h-12 w-full border border-[#C8D4E1] bg-white px-3 py-3 text-xs text-[#475569] file:mr-4 file:border-0 file:bg-[#EAF2FB] file:px-3 file:py-2 file:text-xs file:font-bold file:text-[#1769D2]"
+                          onChange={(
+                            event: ChangeEvent<HTMLInputElement>
+                          ) =>
+                            setData(
+                              (current) => ({
+                                ...current,
+                                incomeProof:
+                                  event.target
+                                    .files?.[0] ||
+                                  null,
+                              })
+                            )
+                          }
+                          className="block w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] file:mr-4 file:border-0 file:bg-[#0E2A4A] file:px-4 file:py-2 file:text-xs file:font-extrabold file:text-white dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
                         />
 
-                        <p className="mt-2 text-[10px] font-medium text-[#7A8797]">
-                          PDF format only.
+                        <p className="mt-2 text-[11px] leading-5 text-[#64748B] dark:text-[#94A3B8]">
+                          Upload supporting income
+                          documentation where applicable.
                         </p>
+                      </div>
 
-                        {data.incomeProof ? (
-                          <p className="mt-2 text-[11px] font-bold text-[#166534]">
-                            Selected:{" "}
-                            {data.incomeProof.name}
-                          </p>
-                        ) : null}
+                      <div>
+                        <label
+                          htmlFor="purpose"
+                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                        >
+                          Assistance Purpose
+                        </label>
+
+                        <select
+                          id="purpose"
+                          value={
+                            data.purpose || ""
+                          }
+                          onChange={(
+                            event: ChangeEvent<HTMLSelectElement>
+                          ) =>
+                            setData(
+                              (current) => ({
+                                ...current,
+                                purpose:
+                                  event.target
+                                    .value as FormData["purpose"],
+                              })
+                            )
+                          }
+                          className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
+                        >
+                          <option value="">
+                            Select purpose
+                          </option>
+
+                          {PURPOSE_OPTIONS.map(
+                            (purpose) => (
+                              <option
+                                key={purpose.value}
+                                value={purpose.value}
+                              >
+                                {purpose.label}
+                              </option>
+                            )
+                          )}
+                        </select>
                       </div>
 
                     </div>
                   </div>
                 ) : null}
 
-                {/* Non-earning route */}
+                {/* =====================================================
+                    NON-EARNING ROUTE
+                    ===================================================== */}
                 {data.earningStatus ===
                 "non-earning" ? (
-                  <div className="border border-[#CBD5E1]">
-                    <div className="border-b border-[#CBD5E1] bg-[#F8FAFC] px-5 py-4">
-                      <p className="text-xs font-extrabold text-[#102A43]">
-                        Assessment route
-                      </p>
+                  <div className="border border-[#CBD5E1] dark:border-[#344457]">
 
-                      <p className="mt-1 text-[11px] font-medium leading-5 text-[#64748B]">
-                        Select what you currently need
-                        assistance for.
+                    <div className="border-b border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                      <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                        Assessment Route
+                      </h3>
+
+                      <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                        Select the purpose for which you
+                        are seeking financial assistance.
                       </p>
                     </div>
 
                     <div className="space-y-5 p-5">
 
-                      <div>
-                        <p className="mb-3 text-xs font-bold text-[#334155]">
-                          Purpose
-                        </p>
+                      <div className="grid gap-4 sm:grid-cols-2">
 
-                        <div className="grid gap-3 md:grid-cols-2">
-                          {PURPOSE_OPTIONS.map(
-                            (option) => {
-                              const selected =
-                                data.assessmentPurpose ===
-                                option.value;
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setData(
+                              (current) => ({
+                                ...current,
+                                assessmentPurpose:
+                                  "education",
+                                purpose:
+                                  "education",
+                                activityType:
+                                  "",
+                              })
+                            )
+                          }
+                          className={`border px-5 py-5 text-left transition ${
+                            data.assessmentPurpose ===
+                            "education"
+                              ? "border-[#1769D2] bg-[#F0F7FF] dark:border-[#1769D2] dark:bg-[#132033]"
+                              : "border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
+                          }`}
+                        >
+                          <p className="text-sm font-black text-[#102A43] dark:text-white">
+                            Education
+                          </p>
 
-                              return (
-                                <button
-                                  key={
-                                    option.value
-                                  }
-                                  type="button"
-                                  onClick={() =>
-                                    selectAssessmentPurpose(
-                                      option.value as AssessmentPurpose
-                                    )
-                                  }
-                                  className={`border p-4 text-left transition-colors ${
-                                    selected
-                                      ? "border-[#1769D2] bg-[#F3F8FF]"
-                                      : "border-[#CBD5E1] bg-white hover:border-[#94A3B8]"
-                                  }`}
-                                >
-                                  <p className="text-xs font-extrabold text-[#102A43]">
-                                    {option.label}
-                                  </p>
+                          <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                            Explore assistance related
+                            to education and training.
+                          </p>
+                        </button>
 
-                                  <p className="mt-1 text-[11px] font-medium leading-5 text-[#64748B]">
-                                    {
-                                      option.description
-                                    }
-                                  </p>
-                                </button>
-                              );
-                            }
-                          )}
-                        </div>
-                      </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setData(
+                              (current) => ({
+                                ...current,
+                                assessmentPurpose:
+                                  "small-project",
+                                purpose:
+                                  "small-project",
+                                activityType:
+                                  "",
+                              })
+                            )
+                          }
+                          className={`border px-5 py-5 text-left transition ${
+                            data.assessmentPurpose ===
+                            "small-project"
+                              ? "border-[#1769D2] bg-[#F0F7FF] dark:border-[#1769D2] dark:bg-[#132033]"
+                              : "border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
+                          }`}
+                        >
+                          <p className="text-sm font-black text-[#102A43] dark:text-white">
+                            Small Project
+                          </p>
 
-                      <div className="grid gap-5 md:grid-cols-2">
-
-                        <div>
-                          <label
-                            htmlFor="amount-needed"
-                            className="mb-2 block text-xs font-bold text-[#334155]"
-                          >
-                            Amount currently needed
-                          </label>
-
-                          <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-[#64748B]">
-                              ₹
-                            </span>
-
-                            <input
-                              id="amount-needed"
-                              type="number"
-                              min="1"
-                              value={
-                                data.amountNeeded
-                              }
-                              onChange={(event) =>
-                                update(
-                                  "amountNeeded",
-                                  event.target.value
-                                )
-                              }
-                              placeholder="Enter amount"
-                              className="min-h-12 w-full border border-[#C8D4E1] bg-white pl-8 pr-3 text-sm text-[#1F2937] outline-none placeholder:text-[#94A3B8] focus:border-[#1769D2]"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label
-                            htmlFor="project-cost"
-                            className="mb-2 block text-xs font-bold text-[#334155]"
-                          >
-                            Estimated project cost
-                          </label>
-
-                          <input
-                            id="project-cost"
-                            type="number"
-                            min="0"
-                            value={
-                              data.projectCost
-                            }
-                            onChange={(event) =>
-                              update(
-                                "projectCost",
-                                event.target.value
-                              )
-                            }
-                            placeholder="Enter project cost"
-                            className="min-h-12 w-full border border-[#C8D4E1] bg-white px-3 text-sm text-[#1F2937] outline-none placeholder:text-[#94A3B8] focus:border-[#1769D2]"
-                          />
-                        </div>
+                          <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                            Explore support for a
+                            small project or activity.
+                          </p>
+                        </button>
 
                       </div>
 
                       {data.assessmentPurpose ===
                       "education" ? (
-                        <div className="grid gap-5 md:grid-cols-2">
+                        <div>
+                          <label
+                            htmlFor="educationLevel"
+                            className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                          >
+                            Education Level
+                          </label>
 
-                          <div>
-                            <label
-                              htmlFor="education-level"
-                              className="mb-2 block text-xs font-bold text-[#334155]"
-                            >
-                              Education level
-                            </label>
+                          <select
+                            id="educationLevel"
+                            value={
+                              data.educationLevel
+                            }
+                            onChange={(
+                              event: ChangeEvent<HTMLSelectElement>
+                            ) =>
+                              setData(
+                                (current) => ({
+                                  ...current,
+                                  educationLevel:
+                                    event.target
+                                      .value,
+                                })
+                              )
+                            }
+                            className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
+                          >
+                            <option value="">
+                              Select education level
+                            </option>
 
-                            <select
-                              id="education-level"
-                              value={
-                                data.educationLevel
-                              }
-                              onChange={(event) =>
-                                update(
-                                  "educationLevel",
-                                  event.target.value
-                                )
-                              }
-                              className="min-h-12 w-full border border-[#C8D4E1] bg-white px-3 text-sm text-[#1F2937] outline-none focus:border-[#1769D2]"
-                            >
-                              <option value="">
-                                Select education level
-                              </option>
-
-                              {EDUCATION_OPTIONS.map(
-                                (option) => (
-                                  <option
-                                    key={option}
-                                    value={option}
-                                  >
-                                    {option}
-                                  </option>
-                                )
-                              )}
-                            </select>
-                          </div>
-
-                          <div>
-                            <label
-                              htmlFor="course-location"
-                              className="mb-2 block text-xs font-bold text-[#334155]"
-                            >
-                              Course location
-                            </label>
-
-                            <input
-                              id="course-location"
-                              type="text"
-                              value={
-                                data.courseLocation
-                              }
-                              onChange={(event) =>
-                                update(
-                                  "courseLocation",
-                                  event.target.value
-                                )
-                              }
-                              placeholder="Enter course location"
-                              className="min-h-12 w-full border border-[#C8D4E1] bg-white px-3 text-sm text-[#1F2937] outline-none placeholder:text-[#94A3B8] focus:border-[#1769D2]"
-                            />
-                          </div>
-
+                            {EDUCATION_OPTIONS.map(
+                              (education) => (
+                                <option
+                                  key={education}
+                                  value={education}
+                                >
+                                  {education}
+                                </option>
+                              )
+                            )}
+                          </select>
                         </div>
                       ) : null}
 
+                      {data.assessmentPurpose ===
+                      "education" ? (
+                        <div>
+                          <label
+                            htmlFor="courseLocation"
+                            className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                          >
+                            Course Location
+                          </label>
+
+                          <input
+                            id="courseLocation"
+                            type="text"
+                            value={
+                              data.courseLocation
+                            }
+                            onChange={(
+                              event: ChangeEvent<HTMLInputElement>
+                            ) =>
+                              setData(
+                                (current) => ({
+                                  ...current,
+                                  courseLocation:
+                                    event.target
+                                      .value,
+                                })
+                              )
+                            }
+                            placeholder="Enter city or institution location"
+                            className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                          />
+                        </div>
+                      ) : null}
+
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* =====================================================
+                    PROJECT DETAILS
+                    ===================================================== */}
+                {data.assessmentPurpose ===
+                "small-project" ||
+                (data.earningStatus ===
+                  "earning" &&
+                  data.purpose ===
+                    "small-project") ? (
+                  <div className="border border-[#CBD5E1] dark:border-[#344457]">
+
+                    <div className="border-b border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                      <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                        Project Details
+                      </h3>
+
+                      <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                        Provide details about the activity
+                        or project requiring assistance.
+                      </p>
+                    </div>
+
+                    <div className="grid gap-6 p-5 md:grid-cols-2">
+
                       <div>
                         <label
-                          htmlFor="repayment-plan"
-                          className="mb-2 block text-xs font-bold text-[#334155]"
+                          htmlFor="activityType"
+                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
                         >
-                          How do you plan to repay?
+                          Activity Type
                         </label>
 
-                        <textarea
-                          id="repayment-plan"
-                          rows={4}
+                        <select
+                          id="activityType"
                           value={
-                            data.repaymentPlan
+                            data.activityType
                           }
-                          onChange={(event) =>
-                            update(
-                              "repaymentPlan",
-                              event.target.value
+                          onChange={(
+                            event: ChangeEvent<HTMLSelectElement>
+                          ) =>
+                            setData(
+                              (current) => ({
+                                ...current,
+                                activityType:
+                                  event.target
+                                    .value,
+                              })
                             )
                           }
-                          placeholder="Explain your expected repayment source or income plan."
-                          className="w-full resize-none border border-[#C8D4E1] bg-white px-3 py-3 text-sm text-[#1F2937] outline-none placeholder:text-[#94A3B8] focus:border-[#1769D2]"
-                        />
+                          className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
+                        >
+                          <option value="">
+                            Select activity
+                          </option>
+
+                          {(
+                            getActivityForPurpose(
+                              data.purpose
+                            ) || []
+                          ).map((activity) => (
+                            <option
+                              key={activity}
+                              value={activity}
+                            >
+                              {activity}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
-                      <div className="grid gap-5 md:grid-cols-2">
+                      <div>
+                        <label
+                          htmlFor="projectCost"
+                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                        >
+                          Project Cost
+                        </label>
 
-                        <div>
-                          <label
-                            htmlFor="guarantor"
-                            className="mb-2 block text-xs font-bold text-[#334155]"
-                          >
-                            Guarantor information
-                          </label>
+                        <div className="relative">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[#64748B] dark:text-[#94A3B8]">
+                            ₹
+                          </span>
 
-                          <textarea
-                            id="guarantor"
-                            rows={4}
+                          <input
+                            id="projectCost"
+                            type="number"
+                            min="0"
                             value={
-                              data.guarantor
+                              data.projectCost
                             }
-                            onChange={(event) =>
-                              update(
-                                "guarantor",
-                                event.target.value
+                            onChange={(
+                              event: ChangeEvent<HTMLInputElement>
+                            ) =>
+                              setData(
+                                (current) => ({
+                                  ...current,
+                                  projectCost:
+                                    event.target
+                                      .value,
+                                })
                               )
                             }
-                            placeholder="Provide guarantor name and relevant details."
-                            className="w-full resize-none border border-[#C8D4E1] bg-white px-3 py-3 text-sm text-[#1F2937] outline-none placeholder:text-[#94A3B8] focus:border-[#1769D2]"
+                            placeholder="Enter project cost"
+                            className="w-full border border-[#C8D4E1] bg-white py-3 pl-9 pr-4 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
                           />
                         </div>
-
-                        <div>
-                          <label
-                            htmlFor="security-details"
-                            className="mb-2 block text-xs font-bold text-[#334155]"
-                          >
-                            Security / legal guarantee
-                          </label>
-
-                          <textarea
-                            id="security-details"
-                            rows={4}
-                            value={
-                              data.securityDetails
-                            }
-                            onChange={(event) =>
-                              update(
-                                "securityDetails",
-                                event.target.value
-                              )
-                            }
-                            placeholder="Describe available security or legal guarantee details."
-                            className="w-full resize-none border border-[#C8D4E1] bg-white px-3 py-3 text-sm text-[#1F2937] outline-none placeholder:text-[#94A3B8] focus:border-[#1769D2]"
-                          />
-                        </div>
-
-                      </div>
-
-                      {/* Video assessment */}
-                      <div className="border border-[#CBD5E1] bg-[#F8FAFC] p-4">
-                        <label className="flex cursor-pointer items-start gap-3">
-                          <input
-                            type="checkbox"
-                            checked={
-                              data.videoRequested
-                            }
-                            onChange={(event) =>
-                              update(
-                                "videoRequested",
-                                event.target.checked
-                              )
-                            }
-                            className="mt-1 h-4 w-4 accent-[#1769D2]"
-                          />
-
-                          <span>
-                            <span className="block text-xs font-extrabold text-[#102A43]">
-                              Request a video assessment
-                            </span>
-
-                            <span className="mt-1 block text-[11px] font-medium leading-5 text-[#64748B]">
-                              Request a video assessment
-                              with the NIRVAAN team before
-                              proceeding with this route.
-                            </span>
-                          </span>
-                        </label>
-                      </div>
-
-                      <div className="border-l-2 border-[#F47B20] bg-[#FFF7ED] p-4">
-                        <label className="flex cursor-pointer items-start gap-3">
-                          <input
-                            type="checkbox"
-                            checked={
-                              data.teamVerificationAccepted
-                            }
-                            onChange={(event) =>
-                              update(
-                                "teamVerificationAccepted",
-                                event.target.checked
-                              )
-                            }
-                            className="mt-1 h-4 w-4 accent-[#1769D2]"
-                          />
-
-                          <span className="text-[11px] font-medium leading-5 text-[#7C5A32]">
-                            I understand that the NIRVAAN
-                            team must verify the assessment
-                            information and guarantor/security
-                            details before the journey can
-                            proceed.
-                          </span>
-                        </label>
                       </div>
 
                     </div>
                   </div>
                 ) : null}
 
-              </div>
+                {/* =====================================================
+                    INFORMATION NOTICE
+                    ===================================================== */}
+                <div className="border border-[#E9B36A] bg-[#FFF8EC] px-5 py-4 dark:border-[#8A5A1E] dark:bg-[#2A1D0D]">
+                  <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#A65A00] dark:text-[#F5B45B]">
+                    Assessment Information
+                  </p>
 
-              {/* Step controls */}
-              <div className="flex flex-col-reverse gap-3 border-t border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-                <button
-                  type="button"
-                  onClick={previousStep}
-                  className="min-h-12 border border-[#CBD5E1] bg-white px-6 text-xs font-extrabold text-[#334155] transition-colors hover:bg-[#F1F5F9]"
-                >
-                  ← Back
-                </button>
+                  <p className="mt-1 text-sm leading-6 text-[#76511F] dark:text-[#E5C58F]">
+                    Your earning status helps NIRVAAN
+                    determine which assessment route and
+                    financial assistance options are
+                    relevant to your profile.
+                  </p>
+                </div>
 
-                <button
-                  type="button"
-                  onClick={nextStep}
-                  className="min-h-12 border border-[#0758C7] bg-[#0758C7] px-7 text-xs font-extrabold text-white transition-colors hover:bg-[#064CA9]"
-                >
-                  Continue to Smart Scheme Recommender
-                  <span className="ml-3">
-                    →
-                  </span>
-                </button>
+                {/* =====================================================
+                    STEP CONTROL
+                    ===================================================== */}
+                <div className="flex flex-col gap-3 border-t border-[#DCE4EC] bg-[#F8FAFC] px-5 py-5 dark:border-[#263445] dark:bg-[#17212D] sm:flex-row sm:items-center sm:justify-between">
+
+                  <button
+                    type="button"
+                    onClick={previousStep}
+                    className="border border-[#CBD5E1] bg-white px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] transition hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:text-[#CBD5E1] dark:hover:bg-[#1A2633]"
+                  >
+                    Back
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={nextStep}
+                    className="border border-[#1769D2] bg-[#1769D2] px-6 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-white transition hover:bg-[#0F5DBD]"
+                  >
+                    Continue to Smart Scheme Recommender
+                  </button>
+
+                </div>
+
               </div>
             </div>
           ) : null}
 
-                    {/* =====================================================
+          {/* =====================================================
               STEP 03: SMART SCHEME RECOMMENDER
               ===================================================== */}
-          {step === 2 ? (
+                      {step === 2 ? (
             <div>
-              <div className="border-b border-[#DCE4EC] px-5 py-5 sm:px-7">
+              <div className="border-b border-[#DCE4EC] px-5 py-5 sm:px-7 dark:border-[#263445]">
                 <div className="flex items-start gap-4">
                   <span className="flex h-10 w-10 flex-none items-center justify-center bg-[#1769D2] text-xs font-black text-white">
                     03
                   </span>
 
                   <div>
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#1769D2]">
+                    <h2 className="text-xl font-black text-[#102A43] dark:text-white">
                       Smart Scheme Recommender
-                    </p>
-
-                    <h2 className="mt-1 text-xl font-black text-[#102A43]">
-                      Generate your scheme recommendation
                     </h2>
 
-                    <p className="mt-1 text-xs font-medium leading-5 text-[#64748B]">
-                      Your verified information will be used
-                      to identify suitable government financial
-                      assistance options.
+                    <p className="mt-1 text-sm leading-6 text-[#64748B] dark:text-[#A8B5C5]">
+                      Use your verified information to identify
+                      suitable government loan schemes and
+                      understand the available support.
                     </p>
                   </div>
                 </div>
@@ -1678,327 +1834,306 @@ export default function WizardPage() {
 
               <div className="space-y-7 p-5 sm:p-7">
 
-                {/* Profile summary */}
-                <div className="border border-[#CBD5E1]">
-                  <div className="border-b border-[#CBD5E1] bg-[#F8FAFC] px-5 py-4">
-                    <p className="text-xs font-extrabold text-[#102A43]">
-                      Verified journey profile
-                    </p>
+                <div className="border border-[#CBD5E1] dark:border-[#344457]">
+                  <div className="border-b border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                    <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                      Recommendation Inputs
+                    </h3>
 
-                    <p className="mt-1 text-[11px] font-medium leading-5 text-[#64748B]">
+                    <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
                       Review the information that will be
-                      used for scheme matching.
+                      used to generate your scheme
+                      recommendation.
                     </p>
                   </div>
 
-                  <div className="grid gap-px bg-[#DCE4EC] sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid gap-5 p-5 md:grid-cols-2">
 
-                    <div className="bg-white p-4">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#7A8797]">
+                    <div className="border border-[#DCE4EC] bg-[#F8FAFC] p-4 dark:border-[#344457] dark:bg-[#17212D]">
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797] dark:text-[#94A3B8]">
                         Location
                       </p>
 
-                      <p className="mt-1 text-sm font-extrabold text-[#102A43]">
-                        {data.district || "Not provided"}
-                      </p>
-
-                      <p className="mt-1 text-[11px] font-medium text-[#64748B]">
-                        {data.state || "State not provided"}
+                      <p className="mt-2 text-sm font-extrabold text-[#102A43] dark:text-white">
+                        {data.district
+                          ? `${data.district}, ${data.state}`
+                          : data.state || "Not provided"}
                       </p>
                     </div>
 
-                    <div className="bg-white p-4">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#7A8797]">
+                    <div className="border border-[#DCE4EC] bg-[#F8FAFC] p-4 dark:border-[#344457] dark:bg-[#17212D]">
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797] dark:text-[#94A3B8]">
                         Category
                       </p>
 
-                      <p className="mt-1 text-sm font-extrabold text-[#102A43]">
-                        {data.category === "sc"
-                          ? "Scheduled Caste (SC)"
-                          : data.category || "Not provided"}
+                      <p className="mt-2 text-sm font-extrabold text-[#102A43] dark:text-white">
+                        {data.category
+                          ? data.category.toUpperCase()
+                          : "Not provided"}
                       </p>
                     </div>
 
-                    <div className="bg-white p-4">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#7A8797]">
-                        Earning status
+                    <div className="border border-[#DCE4EC] bg-[#F8FAFC] p-4 dark:border-[#344457] dark:bg-[#17212D]">
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797] dark:text-[#94A3B8]">
+                        Earning Status
                       </p>
 
-                      <p className="mt-1 text-sm font-extrabold text-[#102A43]">
+                      <p className="mt-2 text-sm font-extrabold text-[#102A43] dark:text-white">
                         {data.earningStatus ===
                         "earning"
-                          ? "Currently earning"
-                          : "Non-earning"}
+                          ? "Earning"
+                          : data.earningStatus ===
+                              "non-earning"
+                            ? "Non-Earning"
+                            : "Not provided"}
                       </p>
                     </div>
 
-                    <div className="bg-white p-4">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#7A8797]">
-                        Requirement
+                    <div className="border border-[#DCE4EC] bg-[#F8FAFC] p-4 dark:border-[#344457] dark:bg-[#17212D]">
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797] dark:text-[#94A3B8]">
+                        Assistance Purpose
                       </p>
 
-                      <p className="mt-1 text-sm font-extrabold text-[#102A43]">
-                        {data.assessmentPurpose ===
-                        "education"
-                          ? "Educational Loan"
-                          : data.assessmentPurpose ===
-                              "small-project"
-                            ? "Small Project Loan"
-                            : data.purpose ===
-                                "education"
-                              ? "Educational Loan"
-                              : data.purpose ===
-                                  "business"
-                                ? "Small Project Loan"
-                                : "Financial Assistance"}
+                      <p className="mt-2 text-sm font-extrabold text-[#102A43] dark:text-white">
+                        {data.purpose ||
+                          data.assessmentPurpose ||
+                          "Not provided"}
                       </p>
                     </div>
 
                   </div>
                 </div>
 
-                {/* Recommendation explanation */}
-                <div className="grid gap-5 lg:grid-cols-3">
-
-                  <div className="border border-[#CBD5E1] bg-white p-5">
-                    <div className="flex h-9 w-9 items-center justify-center bg-[#EAF2FB] text-sm font-black text-[#1769D2]">
-                      01
-                    </div>
-
-                    <h3 className="mt-4 text-sm font-extrabold text-[#102A43]">
-                      Verified information
-                    </h3>
-
-                    <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
-                      Your identity, location, category and
-                      basic profile information form the
-                      foundation of the recommendation.
-                    </p>
-                  </div>
-
-                  <div className="border border-[#CBD5E1] bg-white p-5">
-                    <div className="flex h-9 w-9 items-center justify-center bg-[#FFF1E7] text-sm font-black text-[#F47B20]">
-                      02
-                    </div>
-
-                    <h3 className="mt-4 text-sm font-extrabold text-[#102A43]">
-                      Requirement matching
-                    </h3>
-
-                    <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
-                      Your earning status and selected
-                      requirement help narrow the relevant
-                      financial assistance options.
-                    </p>
-                  </div>
-
-                  <div className="border border-[#CBD5E1] bg-white p-5">
-                    <div className="flex h-9 w-9 items-center justify-center bg-[#EAF2FB] text-sm font-black text-[#1769D2]">
-                      03
-                    </div>
-
-                    <h3 className="mt-4 text-sm font-extrabold text-[#102A43]">
-                      AI recommendation
-                    </h3>
-
-                    <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
-                      NIRVAAN will process the profile and
-                      return the recommended scheme information
-                      on the next page.
-                    </p>
-                  </div>
-
-                </div>
-
-                {/* Amount summary */}
-                {data.amountNeeded ? (
-                  <div className="border-l-2 border-[#1769D2] bg-[#F3F8FF] px-5 py-4">
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#1769D2]">
-                      Requested amount
-                    </p>
-
-                    <p className="mt-1 text-xl font-black text-[#102A43]">
-                      {formatINR(
-                        Number(
-                          data.amountNeeded
-                        ) || 0
-                      )}
-                    </p>
-
-                    <p className="mt-1 text-[11px] font-medium text-[#64748B]">
-                      This amount will be considered as part
-                      of the recommendation profile.
-                    </p>
-                  </div>
-                ) : null}
-
-                {/* Final notice */}
-                <div className="border border-[#CBD5E1] bg-[#F8FAFC] p-5">
-                  <p className="text-xs font-extrabold text-[#102A43]">
-                    Before you continue
+                <div className="border border-[#E9B36A] bg-[#FFF8EC] px-5 py-4 dark:border-[#8A5A1E] dark:bg-[#2A1D0D]">
+                  <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#A65A00] dark:text-[#F5B45B]">
+                    Smart Matching
                   </p>
 
-                  <ul className="mt-3 space-y-2 text-[11px] font-medium leading-5 text-[#64748B]">
-                    <li>
-                      • Your information will be submitted
-                      to the scheme recommendation service.
-                    </li>
+                  <p className="mt-1 text-sm leading-6 text-[#76511F] dark:text-[#E5C58F]">
+                    NIRVAAN will compare your verified
+                    profile and assessment details with
+                    suitable scheme criteria before
+                    presenting a recommendation.
+                  </p>
+                </div>
 
-                    <li>
-                      • Recommendations are intended to help
-                      you discover potentially suitable
-                      government financial assistance options.
-                    </li>
+                <div className="border border-[#CBD5E1] bg-[#F8FAFC] p-5 dark:border-[#344457] dark:bg-[#17212D]">
+                  <div className="flex items-start gap-4">
+                    <span className="flex h-9 w-9 flex-none items-center justify-center bg-[#0E2A4A] text-xs font-black text-white">
+                      03
+                    </span>
 
-                    <li>
-                      • Final eligibility, sanction,
-                      approval and disbursement decisions
-                      are made by the applicable authority or
-                      lending institution.
-                    </li>
-                  </ul>
+                    <div>
+                      <p className="text-sm font-black text-[#102A43] dark:text-white">
+                        Recommendation Ready
+                      </p>
+
+                      <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                        Continue to generate your personalized
+                        scheme recommendation.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 {error ? (
-                  <div className="border-l-2 border-[#DC2626] bg-[#FEF2F2] px-4 py-3">
-                    <p className="text-xs font-bold text-[#B91C1C]">
+                  <div className="border border-[#D68A8A] bg-[#FFF1F1] px-5 py-4 dark:border-[#743737] dark:bg-[#2A1515]">
+                    <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#A32929] dark:text-[#F28B8B]">
+                      Unable to continue
+                    </p>
+
+                    <p className="mt-1 text-sm leading-6 text-[#713333] dark:text-[#E7B1B1]">
                       {error}
                     </p>
                   </div>
                 ) : null}
 
-                {notice ? (
-                  <div className="border-l-2 border-[#16804A] bg-[#F0FDF4] px-4 py-3">
-                    <p className="text-xs font-bold text-[#166534]">
-                      {notice}
-                    </p>
-                  </div>
-                ) : null}
+                <div className="flex flex-col gap-3 border-t border-[#DCE4EC] bg-[#F8FAFC] px-5 py-5 dark:border-[#263445] dark:bg-[#17212D] sm:flex-row sm:items-center sm:justify-between">
+
+                  <button
+                    type="button"
+                    onClick={previousStep}
+                    className="border border-[#CBD5E1] bg-white px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] transition hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:text-[#CBD5E1] dark:hover:bg-[#1A2633]"
+                  >
+                    Back
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={onSubmit}
+                    disabled={submitting}
+                    className="border border-[#1769D2] bg-[#1769D2] px-6 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-white transition hover:bg-[#0F5DBD] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {submitting
+                      ? "Generating Recommendation..."
+                      : "Generate Scheme Recommendation"}
+                  </button>
+
+                </div>
 
               </div>
+            </div>
+          ) : null}
 
-              {/* Final controls */}
-              <div className="flex flex-col-reverse gap-3 border-t border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-                <button
-                  type="button"
-                  onClick={previousStep}
-                  disabled={submitting}
-                  className="min-h-12 border border-[#CBD5E1] bg-white px-6 text-xs font-extrabold text-[#334155] transition-colors hover:bg-[#F1F5F9] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  ← Back
-                </button>
+          {/* =====================================================
+              JOURNEY COMPLETION / LOADING
+              ===================================================== */}
 
-                <button
-                  type="button"
-                  onClick={() => onSubmit()}
-                  disabled={submitting}
-                  className="min-h-12 border border-[#0758C7] bg-[#0758C7] px-7 text-xs font-extrabold text-white transition-colors hover:bg-[#064CA9] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {submitting
-                    ? "Generating Recommendation..."
-                    : "Generate My Recommendation"}
-                  {!submitting ? (
-                    <span className="ml-3">
-                      →
-                    </span>
-                  ) : null}
-                </button>
+          {submitting ? (
+            <div className="border-t border-[#DCE4EC] bg-[#F8FAFC] px-5 py-8 dark:border-[#263445] dark:bg-[#0F1722]">
+              <div className="mx-auto max-w-xl text-center">
+
+                <div className="mx-auto flex h-12 w-12 items-center justify-center border-2 border-[#1769D2] border-t-transparent">
+                  <span className="h-5 w-5 animate-spin border-2 border-[#1769D2] border-t-transparent" />
+                </div>
+
+                <h3 className="mt-5 text-lg font-black text-[#102A43] dark:text-white">
+                  Preparing your recommendation
+                </h3>
+
+                <p className="mt-2 text-sm leading-6 text-[#64748B] dark:text-[#A8B5C5]">
+                  We are processing your verified information
+                  and preparing suitable scheme options.
+                </p>
+
               </div>
             </div>
           ) : null}
 
         </div>
-      </div>
-    </section>
+      </section>
+              {/* =====================================================
+          FIVE JOURNEY HIGHLIGHTS
+          ===================================================== */}
+      <section className="border-t border-[#DCE4EC] bg-white dark:border-[#263445] dark:bg-[#0F1722]">
+        <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
 
-    {/* =====================================================
-        FIVE JOURNEY HIGHLIGHTS
-        ===================================================== */}
-    <section className="border-t border-[#DCE4EC] bg-white px-5 py-10 sm:px-8 lg:px-10">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-6">
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#1769D2]">
-            Your journey
-          </p>
+          <div className="mb-6">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#1769D2]">
+              Your Journey
+            </p>
 
-          <h2 className="mt-2 text-2xl font-black text-[#102A43]">
-            Five stages. One clear route.
-          </h2>
-        </div>
+            <h2 className="mt-2 text-2xl font-black text-[#102A43] dark:text-white sm:text-3xl">
+              Five Journey Highlights
+            </h2>
 
-        <div className="grid gap-px border border-[#DCE4EC] bg-[#DCE4EC] sm:grid-cols-2 lg:grid-cols-5">
-          {[
-            [
-              "01",
-              "Verify",
-              "Identity first",
-            ],
-            [
-              "02",
-              "Assess",
-              "Understand your route",
-            ],
-            [
-              "03",
-              "Match",
-              "Let AI recommend",
-            ],
-            [
-              "04",
-              "Plan",
-              "Check your repayment",
-            ],
-            [
-              "05",
-              "Locate",
-              "Find your partner",
-            ],
-          ].map(
-            ([number, title, description]) => (
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[#64748B] dark:text-[#A8B5C5]">
+              NIRVAAN follows a structured journey from
+              verification through scheme discovery and
+              financial planning to partner assistance.
+            </p>
+          </div>
+
+          <div className="grid gap-px border border-[#DCE4EC] bg-[#DCE4EC] dark:border-[#344457] dark:bg-[#344457] md:grid-cols-5">
+
+            {STEPS.map((item) => (
               <div
-                key={number}
-                className="bg-white p-5"
+                key={item.number}
+                className="bg-white p-5 dark:bg-[#111923]"
               >
-                <p className="text-[10px] font-black text-[#1769D2]">
-                  {number}
-                </p>
+                <span className="text-[11px] font-black text-[#1769D2]">
+                  {item.number}
+                </span>
 
-                <p className="mt-2 text-sm font-extrabold text-[#102A43]">
-                  {title}
-                </p>
+                <h3 className="mt-3 text-sm font-black text-[#102A43] dark:text-white">
+                  {item.title}
+                </h3>
 
-                <p className="mt-1 text-[11px] font-medium leading-5 text-[#64748B]">
-                  {description}
+                <p className="mt-2 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                  {item.description}
                 </p>
               </div>
-            )
-          )}
+            ))}
+
+          </div>
+
+          {/* =====================================================
+              INDEPENDENT PARTNER ACCESS NOTICE
+              ===================================================== */}
+          <div className="mt-6 border border-[#CBD5E1] bg-[#F8FAFC] p-5 dark:border-[#344457] dark:bg-[#17212D]">
+
+            <div className="border border-[#DCE4EC] bg-white p-5 dark:border-[#344457] dark:bg-[#111923]">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+                <div>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#1769D2]">
+                    Independent Access
+                  </p>
+
+                  <p className="mt-2 max-w-3xl text-sm leading-6 text-[#64748B] dark:text-[#A8B5C5]">
+                    Partner institution locations and routes
+                    can be explored independently at any time.
+                    Loan assistance through NIRVAAN follows
+                    the five-stage journey in sequence.
+                  </p>
+                </div>
+
+                <a
+                  href="/partner-location"
+                  className="inline-flex flex-none items-center justify-center border border-[#0E2A4A] bg-[#0E2A4A] px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-white transition hover:bg-[#16395F]"
+                >
+                  Explore Partners
+                </a>
+
+              </div>
+            </div>
+
+          </div>
+
         </div>
-      </div>
-    </section>
+      </section>
 
-    {/* =====================================================
-        INDEPENDENT PLATFORM NOTICE
-        ===================================================== */}
-    <section className="border-t border-[#DCE4EC] bg-[#F8FAFC] px-5 py-8 sm:px-8 lg:px-10">
-      <div className="mx-auto max-w-7xl">
-        <div className="border border-[#CBD5E1] bg-white p-5 sm:p-6">
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#1769D2]">
-            Important information
-          </p>
+      {/* =====================================================
+          FOOTER
+          ===================================================== */}
+      <footer className="border-t border-[#DCE4EC] bg-[#F8FAFC] dark:border-[#263445] dark:bg-[#0B1118]">
+        <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10">
 
-          <p className="mt-2 max-w-5xl text-xs font-medium leading-6 text-[#64748B]">
-            NIRVAAN is an independent platform for
-            discovering government schemes, understanding
-            financing options and preparing applications.
-            NIRVAAN does not make final eligibility,
-            sanction, approval or disbursement decisions.
-          </p>
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+
+            <div>
+              <p className="text-lg font-black tracking-tight text-[#102A43] dark:text-white">
+                N<span className="text-[#1769D2]">I</span>RVAAN
+              </p>
+
+              <p className="mt-2 max-w-md text-xs leading-5 text-[#64748B] dark:text-[#94A3B8]">
+                India&apos;s Official Loan Assistance Platform.
+              </p>
+            </div>
+
+            <div className="text-left sm:text-right">
+              <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]">
+                Contact
+              </p>
+
+              <p className="mt-2 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                +91 9373542405
+              </p>
+
+              <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                nirvaanscheme@gmail.com
+              </p>
+            </div>
+
+          </div>
+
+          <div className="mt-7 border-t border-[#DCE4EC] pt-5 dark:border-[#263445]">
+            <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-[#7A8797] dark:text-[#64748B]">
+              © {new Date().getFullYear()} NIRVAAN. All rights reserved.
+            </p>
+          </div>
+
         </div>
-      </div>
-    </section>
+      </footer>
 
-  </main>
+      {/* =====================================================
+          NIRVAAN AI
+          ===================================================== */}
+      <div className="pointer-events-none">
+        {/* Nirvaan AI is rendered globally through the layout. */}
+      </div>
+
+    </main>
   );
-
-              }
+      }
+                        
