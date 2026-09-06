@@ -1060,11 +1060,14 @@ export default function WizardPage() {
                           Select state
                         </option>
 
-                        {LOCATIONS.map(
-                          (location) => (
-                            <option
-                              key={location.state}
-                              value={location.state}
+                        {LOCATIONS.map((location) => (
+  <option
+    key={location}
+    value={location}
+  >
+    {location}
+  </option>
+))}
                             >
                               {location.state}
                             </option>
