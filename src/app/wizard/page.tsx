@@ -212,6 +212,7 @@ export default function WizardPage() {
 
   const [step, setStep] = useState(0);
   const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [data, setData] =
     useState<FormData>(INITIAL_DATA);
 
