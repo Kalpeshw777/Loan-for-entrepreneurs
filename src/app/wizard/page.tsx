@@ -752,7 +752,7 @@ export default function WizardPage() {
       {/* =====================================================
           FORM AREA
           ===================================================== */}
-      <section className="px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
+      <section className="px-5 py-8 font-sans sm:px-8 sm:py-10 lg:px-10">
         <div className="mx-auto max-w-7xl">
 
           <div className="border border-[#CBD5E1] bg-white dark:border-[#263445] dark:bg-[#111923]">
