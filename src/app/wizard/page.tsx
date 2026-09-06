@@ -734,63 +734,9 @@ activityType: data.activityType,
           ===================================================== */}
       <section className="px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
         <div className="mx-auto max-w-7xl">
-          <div className="grid gap-6 lg:grid-cols-[1fr_310px]">
   <div className="border border-[#CBD5E1] bg-white">
     {/* Main content continues below */}
               <div className="border border-[#CBD5E1] bg-white">
-                <div className="border-b border-[#CBD5E1] bg-[#0E2A4A] px-5 py-4">
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#F47B20]">
-                    Journey overview
-                  </p>
-
-                  <p className="mt-1 text-sm font-extrabold text-white">
-                    One guided process
-                  </p>
-                </div>
-
-                <div className="divide-y divide-[#E1E8EF]">
-                  {STEPS.map((item, index) => (
-                    <div
-                      key={item.number}
-                      className={`p-4 ${
-                        index === step
-                          ? "border-l-4 border-[#1769D2] bg-[#F8FBFF]"
-                          : ""
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="text-[10px] font-black text-[#9AA8B8]">
-                          {item.number}
-                        </span>
-
-                        <div>
-                          <p className="text-xs font-extrabold text-[#263D55]">
-                            {item.title}
-                          </p>
-
-                          <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
-                            {item.description}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-5 border border-[#CBD5E1] bg-white p-5">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#1769D2]">
-                  Privacy
-                </p>
-
-                <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
-                  Provide only the information needed for
-                  your journey. Uploaded documents are used
-                  as part of the relevant assessment flow.
-                </p>
-              </div>
-                        
-                      {/* =====================================================
                   STEP 01: VERIFICATION
                   ===================================================== */}
               {step === 0 ? (
@@ -1903,137 +1849,85 @@ activityType: data.activityType,
                                 </div>
               ) : null}
               </div>
-            </div>
-          </div>
         </section>
 
       {/* =====================================================
-          MOBILE JOURNEY SUMMARY
-          ===================================================== */}
-      <section className="border-t border-[#DCE4EC] bg-white lg:hidden">
-        <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
-          <div className="border border-[#CBD5E1]">
-            <div className="border-b border-[#CBD5E1] bg-[#0E2A4A] px-5 py-4">
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#F47B20]">
-                Journey overview
-              </p>
-
-              <p className="mt-1 text-sm font-extrabold text-white">
-                Five connected stages
-              </p>
-            </div>
-
-            <div className="divide-y divide-[#E1E8EF]">
-              {STEPS.map((item, index) => (
-                <div
-                  key={item.number}
-                  className={`p-4 ${
-                    index === step
-                      ? "border-l-4 border-[#1769D2] bg-[#F8FBFF]"
-                      : ""
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <span
-                      className={`flex h-8 w-8 flex-none items-center justify-center border text-[10px] font-black ${
-                        index === step
-                          ? "border-[#1769D2] bg-[#1769D2] text-white"
-                          : index < step
-                            ? "border-[#0E2A4A] bg-[#0E2A4A] text-white"
-                            : "border-[#CBD5E1] bg-white text-[#708095]"
-                      }`}
-                    >
-                      {index < step
-                        ? "✓"
-                        : item.number}
-                    </span>
-
-                    <div>
-                      <p
-                        className={`text-xs font-extrabold ${
-                          index === step
-                            ? "text-[#1769D2]"
-                            : "text-[#263D55]"
-                        }`}
-                      >
-                        {item.title}
-                      </p>
-
-                      <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-5 border border-[#CBD5E1] bg-[#F8FAFC] p-5">
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#1769D2]">
-              Privacy
-            </p>
-
-            <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
-              Provide only the information needed for your
-              journey. Uploaded documents are used as part of
-              the relevant assessment flow.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* =====================================================
-          BOTTOM INFORMATION
+          FIVE JOURNEY HIGHLIGHTS
           ===================================================== */}
       <section className="border-t border-[#DCE4EC] bg-[#F7F9FC]">
         <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10">
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+
+            {/* 01 */}
             <div className="border border-[#CBD5E1] bg-white p-5">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#1769D2]">
                 01 · Verify
               </p>
-
               <h3 className="mt-2 text-sm font-extrabold text-[#102A43]">
                 Identity first
               </h3>
-
               <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
                 DigiLocker OTP verification and Aadhaar or PAN
-                verification establish the identity stage.
+                verification establish your identity.
               </p>
             </div>
 
+            {/* 02 */}
             <div className="border border-[#CBD5E1] bg-white p-5">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#F47B20]">
                 02 · Assess
               </p>
-
               <h3 className="mt-2 text-sm font-extrabold text-[#102A43]">
                 Understand your route
               </h3>
-
               <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
-                Earning applicants provide income proof. Non-earning
-                applicants follow the assessment route.
+                Tell us whether you earn or need an assessment
+                route.
               </p>
             </div>
 
+            {/* 03 */}
             <div className="border border-[#CBD5E1] bg-white p-5">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#1769D2]">
                 03 · Match
               </p>
-
               <h3 className="mt-2 text-sm font-extrabold text-[#102A43]">
                 Let AI recommend
               </h3>
-
               <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
-                Your verified journey information is used by the
-                Smart Scheme Recommender to identify suitable
-                options.
+                Your verified information is used by the Smart
+                Scheme Recommender to identify suitable options.
               </p>
             </div>
+
+            {/* 04 */}
+            <div className="border border-[#CBD5E1] bg-white p-5">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#F47B20]">
+                04 · Plan
+              </p>
+              <h3 className="mt-2 text-sm font-extrabold text-[#102A43]">
+                Check your repayment
+              </h3>
+              <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
+                Select an amount and understand your expected
+                repayment plan.
+              </p>
+            </div>
+
+            {/* 05 */}
+            <div className="border border-[#CBD5E1] bg-white p-5">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#1769D2]">
+                05 · Locate
+              </p>
+              <h3 className="mt-2 text-sm font-extrabold text-[#102A43]">
+                Find your partner
+              </h3>
+              <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
+                Get location options and routes to the appropriate
+                partner institution.
+              </p>
+            </div>
+
           </div>
         </div>
       </section>
