@@ -730,15 +730,17 @@ activityType: data.activityType,
       </section>
 
       {/* =====================================================
-          FORM AREA
-          ===================================================== */}
-      <section className="px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
-        <div className="mx-auto max-w-7xl">
-  <div className="border border-[#CBD5E1] bg-white">
-    {/* Main content continues below */}
-              <div className="border border-[#CBD5E1] bg-white">
-                  STEP 01: VERIFICATION
-                  ===================================================== */}
+    FORM AREA
+    ===================================================== */}
+<section className="px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
+  <div className="mx-auto max-w-7xl">
+    <div className="border border-[#CBD5E1] bg-white">
+      {/* Main content continues below */}
+      <div className="border border-[#CBD5E1] bg-white">
+
+        {/* =====================================================
+            STEP 01: VERIFICATION
+            ===================================================== */}
               {step === 0 ? (
                 <div>
                   <div className="border-b border-[#DCE4EC] px-5 py-5 sm:px-7">
