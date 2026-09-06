@@ -1998,8 +1998,9 @@ export default function WizardPage() {
 
               </div>
             </div>
-          ) : null}
+                    ) : null}
 
+        </div>
         </div>
       </section>
               {/* =====================================================
