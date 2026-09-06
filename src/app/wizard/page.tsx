@@ -633,7 +633,8 @@ activityType: data.activityType,
 
   const currentStep = STEPS[step];
 
-  return (
+return (
+  <>
     <main className="min-h-screen bg-[#F7F9FC] text-[#111827]">
       {/* =====================================================
           PAGE HEADER
@@ -1951,6 +1952,7 @@ activityType: data.activityType,
           </div>
         </div>
             </section>
-    </main>
+        </main>
+  </>
   );
-        }
+  }
