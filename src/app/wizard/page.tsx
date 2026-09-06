@@ -1699,18 +1699,13 @@ export default function WizardPage() {
                             Select activity
                           </option>
 
-                          {(
-                            getActivityForPurpose(
-                              data.purpose
-                            ) || []
-                          ).map((activity) => (
-                            <option
-                              key={activity}
-                              value={activity}
-                            >
-                              {activity}
-                            </option>
-                          ))}
+                          {getActivityForPurpose(data.purpose).activity && (
+  <option
+    value={getActivityForPurpose(data.purpose).activity}
+  >
+    {getActivityForPurpose(data.purpose).activity}
+  </option>
+)}
                         </select>
                       </div>
 
