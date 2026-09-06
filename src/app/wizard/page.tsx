@@ -1534,7 +1534,7 @@ export default function WizardPage() {
                                 assessmentPurpose:
                                   "small-project",
                                 purpose:
-                                  "small-project",
+                                  "business",
                                 activityType:
                                   "",
                               })
