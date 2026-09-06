@@ -1651,8 +1651,8 @@ export default function WizardPage() {
                 "small-project" ||
                 (data.earningStatus ===
                   "earning" &&
-                  data.assessmentPurpose ===
-  "small-project") ? (
+                  data.purpose ===
+  "business") ? (
                   <div className="border border-[#CBD5E1] dark:border-[#344457]">
 
                     <div className="border-b border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
