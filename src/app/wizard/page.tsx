@@ -1043,37 +1043,29 @@ export default function WizardPage() {
                       </label>
 
                       <select
-                        id="state"
-                        value={data.state}
-                        onChange={(
-                          event: ChangeEvent<HTMLSelectElement>
-                        ) =>
-                          setData((current) => ({
-                            ...current,
-                            state: event.target.value,
-                            district: "",
-                          }))
-                        }
-                        className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
-                      >
-                        <option value="">
-                          Select state
-                        </option>
-
-                        {LOCATIONS.map((location) => (
-  <option
-    key={location}
-    value={location}
-  >
-    {location}
+  id="state"
+  value={data.state}
+  onChange={(
+    event: ChangeEvent<HTMLSelectElement>
+  ) =>
+    setData((current) => ({
+      ...current,
+      state: event.target.value,
+      district: "",
+    }))
+  }
+  className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
+>
+  <option value="">
+    Select state
   </option>
-))}
-                            >
-                              {location.state}
-                            </option>
-                          )
-                        )}
-                      </select>
+
+  {Object.keys(LOCATIONS).map((state) => (
+    <option key={state} value={state}>
+      {state}
+    </option>
+  ))}
+</select>
                     </div>
 
                     <div>
