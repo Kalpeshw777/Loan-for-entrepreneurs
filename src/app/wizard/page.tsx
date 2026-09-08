@@ -1095,8 +1095,6 @@ export default function WizardPage() {
                     </div>
 
                     <div>
-
-                    <div>
                       <label
                         htmlFor="age"
                         className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
