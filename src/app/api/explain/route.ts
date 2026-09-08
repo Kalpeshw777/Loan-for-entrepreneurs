@@ -45,8 +45,8 @@ ${Object.values(SCHEMES)
 Respond ONLY with valid JSON in this exact shape:
 {"explanation": "<3-4 sentence plain-language explanation of why this scheme fits this person>", "tips": ["<next step 1>", "<next step 2>", "<document/step 3>"]}`;
 
-  const userPrompt = `Applicant profile: purpose=${profile.purpose}, activity=${profile.activityType}, state=${profile.state}, district=${profile.district}, age=${profile.age}, category=${profile.category}, education=${profile.educationLevel}, annual family income=${inr(profile.annualIncome)}, project/course cost=${inr(profile.projectCost)}.
-Recommended scheme: ${recommendation.schemeName}, eligible amount ${inr(recommendation.eligibleAmount)}, rate ${recommendation.interestRate}%, moratorium ${recommendation.moratoriumMonths} months.
+  const userPrompt = `Applicant profile: purpose=${profile.purpose}, activity=${profile.activityType}, state=${profile.state}, district=${profile.district}, age=${profile.age}, education=${profile.educationLevel}, annual family income=${inr(profile.annualIncome)}, project/course cost=${inr(profile.projectCost)}.
+  Recommended scheme: ${recommendation.schemeName}, eligible amount ${inr(recommendation.eligibleAmount)}, rate ${recommendation.interestRate}%, moratorium ${recommendation.moratoriumMonths} months.
 Eligibility checks: ${(recommendation.checks ?? [])
     .map((c) => `${c.label}: ${c.passed ? "passed" : "not passed"}`)
     .join("; ") || "not provided"}.`;
