@@ -100,13 +100,7 @@ export function recommendScheme(p: Profile): Recommendation {
   const rate = rateFor(schemeId, eligibleAmount);
 
   const checks: EligibilityCheck[] = [
-    check(
-      "Category eligibility",
-      p.category === "sc",
-      p.category === "sc"
-        ? "Applicant belongs to Scheduled Caste — eligible."
-        : "Scheme primarily targets SC applicants; ST/OBC have parallel corporations."
-    ),
+    
     check(
       `Family income ≤ ${inr(s.incomeLimit)}/yr`,
       p.annualIncome <= s.incomeLimit,
