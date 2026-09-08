@@ -628,12 +628,11 @@ export default function WizardPage() {
   const currentStep = STEPS[step];
 
   return (
-    <main className="min-h-screen bg-[#F7F9FC] text-[#111827] dark:bg-[#0B1118] dark:text-[#F1F5F9]">
-
+    <main className="min-h-screen bg-[#EEF3F8] text-[#102A43] dark:bg-[#0B1118] dark:text-[#F1F5F9]">
       {/* =====================================================
           PAGE HEADER
           ===================================================== */}
-      <section className="border-b border-[#DCE4EC] bg-white dark:border-[#263445] dark:bg-[#0F1722]">
+      <section className="border-b border-[#DCE4EC] bg-[#F8FAFC] dark:border-[#263445] dark:bg-[#0F1722]">
         <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
 
@@ -672,7 +671,7 @@ export default function WizardPage() {
       {/* =====================================================
           JOURNEY STEPPER
           ===================================================== */}
-      <section className="border-b border-[#DCE4EC] bg-white dark:border-[#263445] dark:bg-[#0F1722]">
+      <section className="border-b border-[#DCE4EC] bg-[#F8FAFC] dark:border-[#263445] dark:bg-[#0F1722]">
         <div className="mx-auto max-w-7xl px-5 py-5 sm:px-8 lg:px-10">
 
           <div className="grid gap-px border border-[#D5DEE8] bg-[#D5DEE8] dark:border-[#263445] dark:bg-[#263445] md:grid-cols-5">
@@ -741,8 +740,7 @@ export default function WizardPage() {
       <section className="px-5 py-8 font-sans sm:px-8 sm:py-10 lg:px-10">
         <div className="mx-auto max-w-7xl">
 
-          <div className="border border-[#CBD5E1] bg-white dark:border-[#263445] dark:bg-[#111923]">
-
+          <div className="border border-[#B8C6D6] bg-[#F8FAFC] dark:border-[#263445] dark:bg-[#111923]">
             {/* =====================================================
                 STEP 01: VERIFICATION
                 ===================================================== */}
@@ -775,8 +773,10 @@ export default function WizardPage() {
                     ===================================================== */}
                 <div className="border border-[#CBD5E1] dark:border-[#344457]">
 
-                  <div className="border-b border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
-                    <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                  
+
+                  <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                   <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
                       Identity Verification
                     </h3>
 
@@ -814,8 +814,8 @@ export default function WizardPage() {
                           className={`border px-4 py-4 text-left transition ${
                             data.verificationMethod ===
                             "aadhaar"
-                              ? "border-[#1769D2] bg-[#F0F7FF] dark:border-[#1769D2] dark:bg-[#132033]"
-                              : "border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
+                              ? "border-[#1769D2] bg-[#E5F0FC] dark:border-[#1769D2] dark:bg-[#132033]"
+                              : "border-[#B8C6D6] bg-[#F8FAFC] hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
                           }`}
                         >
                           <p className="text-sm font-extrabold text-[#102A43] dark:text-white">
@@ -847,8 +847,8 @@ export default function WizardPage() {
                           className={`border px-4 py-4 text-left transition ${
                             data.verificationMethod ===
                             "pan"
-                              ? "border-[#1769D2] bg-[#F0F7FF] dark:border-[#1769D2] dark:bg-[#132033]"
-                              : "border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
+                              ? "border-[#1769D2] bg-[#E5F0FC] dark:border-[#1769D2] dark:bg-[#132033]"
+                              : "border-[#B8C6D6] bg-[#F8FAFC] hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
                           }`}
                         >
                           <p className="text-sm font-extrabold text-[#102A43] dark:text-white">
@@ -902,8 +902,8 @@ export default function WizardPage() {
                         disabled={
                           data.verificationComplete
                         }
-                        className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] disabled:bg-[#F1F5F9] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B] dark:disabled:bg-[#17212D]"
-                      />
+                className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] disabled:bg-[#F1F5F9] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B] dark:disabled:bg-[#17212D]"
+                        />
 
                       <p className="mt-2 text-[11px] leading-5 text-[#64748B] dark:text-[#94A3B8]">
                         Your verification information is
@@ -966,8 +966,8 @@ export default function WizardPage() {
                               }))
                             }
                             placeholder="Enter OTP"
-                            className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
-                          />
+                            className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                            />
 
                           <button
                             type="button"
@@ -1007,8 +1007,8 @@ export default function WizardPage() {
                     ===================================================== */}
                 <div className="border border-[#CBD5E1] dark:border-[#344457]">
 
-                  <div className="border-b border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
-                    <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                  <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                  <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
                       Basic Details
                     </h3>
 
@@ -1039,8 +1039,8 @@ export default function WizardPage() {
       district: "",
     }))
   }
-  className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
->
+  className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
+                        >
   <option value="">
     Select state
   </option>
@@ -1074,8 +1074,8 @@ export default function WizardPage() {
                               event.target.value,
                           }))
                         }
-                        className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] disabled:bg-[#F1F5F9] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:disabled:bg-[#17212D]"
-                      >
+                        className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] disabled:bg-[#F1F5F9] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:disabled:bg-[#17212D]"
+                        >
                         <option value="">
                           {data.state
                             ? "Select district"
@@ -1117,8 +1117,8 @@ export default function WizardPage() {
                           }))
                         }
                         placeholder="Enter your age"
-                        className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
-                      />
+                        className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                        />
                     </div>
 
                   </div>
@@ -1149,8 +1149,8 @@ export default function WizardPage() {
                     type="button"
                     onClick={previousStep}
                     disabled={step === 0}
-                    className="border border-[#CBD5E1] bg-white px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] transition hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#344457] dark:bg-[#0F1722] dark:text-[#CBD5E1] dark:hover:bg-[#1A2633]"
-                  >
+                    className="border border-[#B8C6D6] bg-[#F8FAFC] px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] transition hover:bg-[#EAF0F6] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#344457] dark:bg-[#0F1722] dark:text-[#CBD5E1] dark:hover:bg-[#1A2633]"
+                    >
                     Back
                   </button>
 
@@ -1200,8 +1200,8 @@ export default function WizardPage() {
                     ===================================================== */}
                 <div className="border border-[#CBD5E1] dark:border-[#344457]">
 
-                  <div className="border-b border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
-                    <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                  <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                  <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
                       Current Earning Status
                     </h3>
 
@@ -1228,8 +1228,8 @@ export default function WizardPage() {
                       className={`border px-5 py-5 text-left transition ${
                         data.earningStatus ===
                         "earning"
-                          ? "border-[#1769D2] bg-[#F0F7FF] dark:border-[#1769D2] dark:bg-[#132033]"
-                          : "border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
+                          ? "border-[#1769D2] bg-[#E5F0FC] dark:border-[#1769D2] dark:bg-[#132033]"
+                          : "border-[#B8C6D6] bg-[#F8FAFC] hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
                       }`}
                     >
                       <p className="text-sm font-black text-[#102A43] dark:text-white">
@@ -1255,8 +1255,8 @@ export default function WizardPage() {
                       className={`border px-5 py-5 text-left transition ${
                         data.earningStatus ===
                         "non-earning"
-                          ? "border-[#1769D2] bg-[#F0F7FF] dark:border-[#1769D2] dark:bg-[#132033]"
-                          : "border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
+                          ? "border-[#1769D2] bg-[#E5F0FC] dark:border-[#1769D2] dark:bg-[#132033]"
+                          : "border-[#B8C6D6] bg-[#F8FAFC] hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
                       }`}
                     >
                       <p className="text-sm font-black text-[#102A43] dark:text-white">
@@ -1279,8 +1279,8 @@ export default function WizardPage() {
                 "earning" ? (
                   <div className="border border-[#CBD5E1] dark:border-[#344457]">
 
-                    <div className="border-b border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
-                      <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                   <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                    <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
                         Income Details
                       </h3>
 
@@ -1325,8 +1325,8 @@ export default function WizardPage() {
                               )
                             }
                             placeholder="Enter annual income"
-                            className="w-full border border-[#C8D4E1] bg-white py-3 pl-9 pr-4 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
-                          />
+                  className="w-full border border-[#C8D4E1] bg-[#F8FAFC] py-3 pl-9 pr-4 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                            />
                         </div>
 
                         <p className="mt-2 text-[11px] leading-5 text-[#64748B] dark:text-[#94A3B8]">
@@ -1359,8 +1359,8 @@ export default function WizardPage() {
                               })
                             )
                           }
-                          className="block w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] file:mr-4 file:border-0 file:bg-[#0E2A4A] file:px-4 file:py-2 file:text-xs file:font-extrabold file:text-white dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
-                        />
+                          className="block w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] file:mr-4 file:border-0 file:bg-[#0E2A4A] file:px-4 file:py-2 file:text-xs file:font-extrabold file:text-white dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
+                          />
 
                         <p className="mt-2 text-[11px] leading-5 text-[#64748B] dark:text-[#94A3B8]">
                           Upload supporting income
@@ -1393,8 +1393,8 @@ export default function WizardPage() {
                               })
                             )
                           }
-                          className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
-                        >
+                          className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
+                          >
                           <option value="">
                             Select purpose
                           </option>
@@ -1423,8 +1423,8 @@ export default function WizardPage() {
                 "non-earning" ? (
                   <div className="border border-[#CBD5E1] dark:border-[#344457]">
 
-                    <div className="border-b border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
-                      <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                    <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                    <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
                         Assessment Route
                       </h3>
 
@@ -1456,8 +1456,8 @@ export default function WizardPage() {
                           className={`border px-5 py-5 text-left transition ${
                             data.assessmentPurpose ===
                             "education"
-                              ? "border-[#1769D2] bg-[#F0F7FF] dark:border-[#1769D2] dark:bg-[#132033]"
-                              : "border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
+                              ? "border-[#1769D2] bg-[#E5F0FC] dark:border-[#1769D2] dark:bg-[#132033]"
+                              : "border-[#B8C6D6] bg-[#F8FAFC] hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
                           }`}
                         >
                           <p className="text-sm font-black text-[#102A43] dark:text-white">
@@ -1488,8 +1488,8 @@ export default function WizardPage() {
                           className={`border px-5 py-5 text-left transition ${
                             data.assessmentPurpose ===
                             "small-project"
-                              ? "border-[#1769D2] bg-[#F0F7FF] dark:border-[#1769D2] dark:bg-[#132033]"
-                              : "border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
+                              ? "border-[#1769D2] bg-[#E5F0FC] dark:border-[#1769D2] dark:bg-[#132033]"
+                              : "border-[#B8C6D6] bg-[#F8FAFC] hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
                           }`}
                         >
                           <p className="text-sm font-black text-[#102A43] dark:text-white">
@@ -1531,8 +1531,8 @@ export default function WizardPage() {
                                 })
                               )
                             }
-                            className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
-                          >
+                            className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
+                            >
                             <option value="">
                               Select education level
                             </option>
@@ -1580,8 +1580,8 @@ export default function WizardPage() {
                               )
                             }
                             placeholder="Enter city or institution location"
-                            className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
-                          />
+                            className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                            />
                         </div>
                       ) : null}
 
@@ -1600,8 +1600,8 @@ export default function WizardPage() {
   "business") ? (
                   <div className="border border-[#CBD5E1] dark:border-[#344457]">
 
-                    <div className="border-b border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
-                      <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                    <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                    <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
                         Project Details
                       </h3>
 
@@ -1638,8 +1638,8 @@ export default function WizardPage() {
                               })
                             )
                           }
-                          className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
-                        >
+                          className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
+                          >
                           <option value="">
                             Select activity
                           </option>
@@ -1687,8 +1687,8 @@ export default function WizardPage() {
                               )
                             }
                             placeholder="Enter project cost"
-                            className="w-full border border-[#C8D4E1] bg-white py-3 pl-9 pr-4 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
-                          />
+                            className="w-full border border-[#C8D4E1] bg-[#F8FAFC] py-3 pl-9 pr-4 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                            />
                         </div>
                       </div>
 
@@ -1720,8 +1720,8 @@ export default function WizardPage() {
                   <button
                     type="button"
                     onClick={previousStep}
-                    className="border border-[#CBD5E1] bg-white px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] transition hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:text-[#CBD5E1] dark:hover:bg-[#1A2633]"
-                  >
+                    className="border border-[#B8C6D6] bg-[#F8FAFC] px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] transition hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:text-[#CBD5E1] dark:hover:bg-[#1A2633]"
+                    >
                     Back
                   </button>
 
@@ -1767,8 +1767,8 @@ export default function WizardPage() {
               <div className="space-y-7 p-5 sm:p-7">
 
                 <div className="border border-[#CBD5E1] dark:border-[#344457]">
-                  <div className="border-b border-[#DCE4EC] bg-[#F8FAFC] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
-                    <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                  <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                  <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
                       Recommendation Inputs
                     </h3>
 
@@ -1883,8 +1883,8 @@ export default function WizardPage() {
                   <button
                     type="button"
                     onClick={previousStep}
-                    className="border border-[#CBD5E1] bg-white px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] transition hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#0F1722] dark:text-[#CBD5E1] dark:hover:bg-[#1A2633]"
-                  >
+                    className="border border-[#B8C6D6] bg-[#F8FAFC] px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] transition hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:text-[#CBD5E1] dark:hover:bg-[#1A2633]"
+                    >
                     Back
                   </button>
 
