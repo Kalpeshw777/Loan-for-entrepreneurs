@@ -33,7 +33,6 @@ type AssessmentPurpose =
 type FormData = {
   state: string;
   district: string;
-  category: "sc" | "st" | "obc" | "general" | "";
   age: string;
 
   verificationMethod: VerificationMethod;
@@ -97,7 +96,6 @@ const STEPS = [
 const INITIAL_DATA: FormData = {
   state: "",
   district: "",
-  category: "",
   age: "",
 
   verificationMethod: "aadhaar",
@@ -125,12 +123,6 @@ const INITIAL_DATA: FormData = {
   courseLocation: "",
 };
 
-const CATEGORY_OPTIONS = [
-  {
-    value: "sc",
-    label: "Scheduled Caste (SC)",
-  },
-];
 
 const PURPOSE_OPTIONS = [
   {
@@ -371,10 +363,6 @@ export default function WizardPage() {
       return false;
     }
 
-    if (!data.category) {
-      setError("Please select your category.");
-      return false;
-    }
 
     if (!data.age) {
       setError("Please enter your age.");
@@ -544,8 +532,6 @@ export default function WizardPage() {
     const finalProfile: Profile = {
       state: data.state,
       district: data.district,
-      category:
-        data.category as Profile["category"],
       age: Number(data.age),
       purpose:
         (data.earningStatus === "non-earning"
@@ -1027,8 +1013,7 @@ export default function WizardPage() {
                     </h3>
 
                     <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
-                      Provide your location, category and
-                      age information.
+                      Provide your location and age information.
                     </p>
                   </div>
 
@@ -1110,44 +1095,6 @@ export default function WizardPage() {
                     </div>
 
                     <div>
-                      <label
-                        htmlFor="category"
-                        className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
-                      >
-                        Category
-                      </label>
-
-                      <select
-                        id="category"
-                        value={data.category}
-                        onChange={(
-                          event: ChangeEvent<HTMLSelectElement>
-                        ) =>
-                          setData((current) => ({
-                            ...current,
-                            category:
-                              event.target
-                                .value as FormData["category"],
-                          }))
-                        }
-                        className="w-full border border-[#C8D4E1] bg-white px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
-                      >
-                        <option value="">
-                          Select category
-                        </option>
-
-                        {CATEGORY_OPTIONS.map(
-                          (category) => (
-                            <option
-                              key={category.value}
-                              value={category.value}
-                            >
-                              {category.label}
-                            </option>
-                          )
-                        )}
-                      </select>
-                    </div>
 
                     <div>
                       <label
@@ -1854,9 +1801,7 @@ export default function WizardPage() {
                       </p>
 
                       <p className="mt-2 text-sm font-extrabold text-[#102A43] dark:text-white">
-                        {data.category
-                          ? data.category.toUpperCase()
-                          : "Not provided"}
+                      
                       </p>
                     </div>
 
