@@ -78,7 +78,6 @@ You must respond ONLY with valid JSON in this exact structure:
     const userPrompt = `Applicant Profile:
 - Purpose: ${profile.purpose} (${profile.activityType})
 - Location: ${profile.district}, ${profile.state}
-- Category: ${profile.category.toUpperCase()}
 - Age: ${profile.age} years
 - Education: ${profile.educationLevel}
 - Course Location: ${profile.courseLocation ?? "india"}
