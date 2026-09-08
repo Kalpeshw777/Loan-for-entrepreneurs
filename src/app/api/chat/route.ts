@@ -2,10 +2,6 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import type { Profile } from "@/lib/types";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 type RecommendationContext = {
   schemeName: string;
   eligibleAmount: number;
@@ -77,6 +73,20 @@ Important instructions:
 - Focus on helping the applicant understand their next step.
 
 ${contextBlock}`;
+
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json(
+        {
+          error:
+            "NIRVAAN AI is not configured yet. Please add the OpenAI API key.",
+        },
+        { status: 503 }
+      );
+    }
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
