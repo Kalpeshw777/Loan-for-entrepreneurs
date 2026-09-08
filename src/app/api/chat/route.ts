@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   if (profile) {
     contextBlock = `\nApplicant Profile in Context:
 - State & District: ${profile.district}, ${profile.state}
-- Category: ${profile.category.toUpperCase()} | Age: ${profile.age} years
+- Age: ${profile.age} years
 - Goal/Purpose: ${profile.purpose} (Activity: ${profile.activityType})
 - Estimated Project Cost: ${inr(profile.projectCost)}
 - Annual Family Income: ${inr(profile.annualIncome)}/year
