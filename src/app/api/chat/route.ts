@@ -1,11 +1,21 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import type { Profile } from "@/lib/types";
-import type { RecommendationResult } from "@/lib/recommendation";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+type RecommendationContext = {
+  schemeName: string;
+  eligibleAmount: number;
+  interestRate: number;
+  moratoriumMonths: number;
+  checks?: Array<{
+    label: string;
+    passed: boolean;
+  }>;
+};
 
 function inr(value: number) {
   return new Intl.NumberFormat("en-IN", {
@@ -22,7 +32,7 @@ export async function POST(request: Request) {
     const messages = Array.isArray(body.messages) ? body.messages : [];
     const profile = body.profile as Profile | undefined;
     const recommendation = body.recommendation as
-      | RecommendationResult
+      | RecommendationContext
       | undefined;
 
     let contextBlock = "";
