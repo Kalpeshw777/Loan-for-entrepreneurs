@@ -10,7 +10,6 @@ export type PartnerType =
 export interface Profile {
   state: string;
   district: string;
-  category: "sc" | "st" | "obc" | "general";
   age: number;
   purpose: "business" | "agriculture" | "education";
   activityType: string;
