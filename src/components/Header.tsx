@@ -106,13 +106,13 @@ export default function Header() {
     const saved = localStorage.getItem("nirvaan-theme");
 
     if (saved === "dark") {
-  setDark(true);
-  document.documentElement.dataset.theme = "dark";
-  document.documentElement.classList.add("dark");
-} else {
-  setDark(false);
-  document.documentElement.dataset.theme = "light";
-  document.documentElement.classList.remove("dark");
+      setDark(true);
+      document.documentElement.dataset.theme = "dark";
+      document.documentElement.classList.add("dark");
+    } else {
+      setDark(false);
+      document.documentElement.dataset.theme = "light";
+      document.documentElement.classList.remove("dark");
     }
   }, []);
 
@@ -122,10 +122,10 @@ export default function Header() {
     setDark(next);
 
     document.documentElement.dataset.theme = next
-  ? "dark"
-  : "light";
+      ? "dark"
+      : "light";
 
-document.documentElement.classList.toggle("dark", next);
+    document.documentElement.classList.toggle("dark", next);
 
     localStorage.setItem(
       "nirvaan-theme",
