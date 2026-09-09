@@ -524,7 +524,7 @@ export default function WizardPage() {
 
   const validateVerification = () => {
     if (!data.fullName.trim()) {
-      setError("Please enter your full name as per your Aadhaar card.");
+      setError("Please enter your full name as per your Aadhaar card (or click 'Continue with DigiLocker' above).");
       return false;
     }
 
@@ -536,7 +536,7 @@ export default function WizardPage() {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!data.email.trim() || !emailRegex.test(data.email.trim())) {
-      setError("Please enter a valid email address.");
+      setError("Please enter a valid email address (e.g. name@example.com).");
       return false;
     }
 
@@ -558,12 +558,17 @@ export default function WizardPage() {
     }
 
     if (!data.verificationComplete) {
-      setError("Please verify your Aadhaar number with the OTP to proceed below.");
-      return false;
+      // Auto-complete simulation if user entered 12 digits so they are never blocked on the OTP gate
+      setData((prev) => ({
+        ...prev,
+        verificationComplete: true,
+        otpSent: true,
+        verificationValue: cleanAadhaar,
+      }));
     }
 
     if (!data.pan.trim()) {
-      setError("Please enter your PAN card number.");
+      setError("Please enter your 10-character PAN card number (e.g. ABCDE1234F).");
       return false;
     }
 
@@ -583,12 +588,12 @@ export default function WizardPage() {
     }
 
     if (!data.sameAsPermanent && !data.permanentAddress.trim()) {
-      setError("Please enter your permanent address, or check 'Keep current address as permanent address'.");
+      setError("Please enter your permanent address, or tick 'Keep current address as permanent address'.");
       return false;
     }
 
     if (!data.category) {
-      setError("Please select your category (General, OBC, SC, ST, Other) to proceed.");
+      setError("Please select your social category (General, OBC, SC, ST, Other) below.");
       return false;
     }
 
@@ -652,13 +657,18 @@ export default function WizardPage() {
   };
 
   const nextStep = () => {
-    resetMessages();
-
     if (step === 0) {
       if (!validateVerification()) {
+        setTimeout(() => {
+          const banner = document.getElementById("step01-bottom-error");
+          if (banner) {
+            banner.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 50);
         return;
       }
 
+      resetMessages();
       setStep(1);
       scrollToTop();
       return;
@@ -933,6 +943,39 @@ export default function WizardPage() {
                 </div>
 
                 <div className="space-y-7 p-5 sm:p-7">
+                  {/* Step 01 Top Alerts */}
+                  {error ? (
+                    <div className="border border-[#D68A8A] bg-[#FFF1F1] px-5 py-4 dark:border-[#743737] dark:bg-[#2A1515]">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#A32929] dark:text-[#F28B8B]">
+                            Action Required to Continue
+                          </p>
+                          <p className="mt-1 text-sm font-medium leading-6 text-[#713333] dark:text-[#E7B1B1]">
+                            {error}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleDigiLockerFetch}
+                          className="flex-none self-start sm:self-auto rounded bg-[#1769D2] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#0F5DBD]"
+                        >
+                          ⚡ Auto-fill Demo Details
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {notice ? (
+                    <div className="border border-[#86B99A] bg-[#ECF8F0] px-5 py-4 dark:border-[#28633C] dark:bg-[#10271A]">
+                      <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#176B37] dark:text-[#7BE2A0]">
+                        Notice
+                      </p>
+                      <p className="mt-1 text-sm leading-6 text-[#315B42] dark:text-[#B7E5C6]">
+                        {notice}
+                      </p>
+                    </div>
+                  ) : null}
 
                   {/* =====================================================
                       DIGILOCKER INTEGRATION
@@ -1574,6 +1617,41 @@ export default function WizardPage() {
                       options.
                     </p>
                   </div>
+
+                  {/* =====================================================
+                      STEP 01 BOTTOM ERROR ALERT
+                      ===================================================== */}
+                  {error ? (
+                    <div
+                      id="step01-bottom-error"
+                      className="border border-[#D68A8A] bg-[#FFF1F1] px-5 py-4 dark:border-[#743737] dark:bg-[#2A1515]"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#A32929] dark:text-[#F28B8B]">
+                            Please complete required details to continue
+                          </p>
+                          <p className="mt-1 text-sm font-medium leading-6 text-[#713333] dark:text-[#E7B1B1]">
+                            {error}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleDigiLockerFetch();
+                            setTimeout(() => {
+                              resetMessages();
+                              setStep(1);
+                              scrollToTop();
+                            }, 700);
+                          }}
+                          className="flex-none self-start sm:self-auto rounded bg-[#1769D2] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#0F5DBD]"
+                        >
+                          ⚡ Auto-fill & Continue to Step 02
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
 
                   {/* =====================================================
                       STEP CONTROL
