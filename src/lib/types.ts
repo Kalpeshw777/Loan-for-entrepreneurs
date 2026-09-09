@@ -17,6 +17,22 @@ export interface Profile {
   annualIncome: number;
   educationLevel: "below-10th" | "10th-12th" | "graduate" | "post-graduate";
   courseLocation?: "india" | "abroad";
+  fullName?: string;
+  contactNo?: string;
+  email?: string;
+  dob?: string;
+  aadhaar?: string;
+  pan?: string;
+  currentAddress?: string;
+  permanentAddress?: string;
+  sameAsPermanent?: boolean;
+  category?: "general" | "obc" | "sc" | "st" | "other" | string;
+  businessType?: string;
+  businessName?: string;
+  businessLocation?: string;
+  udyamNo?: string;
+  gstinNo?: string;
+  ownershipType?: "individual" | "partner" | string;
 }
 
 export interface EligibilityCheck {

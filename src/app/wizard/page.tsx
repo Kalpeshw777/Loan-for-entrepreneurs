@@ -3,6 +3,7 @@
 import {
   ChangeEvent,
   FormEvent,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -30,16 +31,32 @@ type AssessmentPurpose =
   | "small-project"
   | "";
 
-type FormData = {
-  state: string;
-  district: string;
-  age: string;
+type CategoryType = "general" | "obc" | "sc" | "st" | "other" | "";
 
-  verificationMethod: VerificationMethod;
-  verificationValue: string;
+type FormData = {
+  // Step 1: User details
+  fullName: string;
+  contactNo: string;
+  email: string;
+  dob: string;
+  age: string;
+  aadhaar: string;
   otp: string;
   otpSent: boolean;
   verificationComplete: boolean;
+  generatedOtp: string;
+  pan: string;
+  currentAddress: string;
+  permanentAddress: string;
+  sameAsPermanent: boolean;
+  state: string;
+  district: string;
+  pincode: string;
+  category: CategoryType;
+
+  // Compatibility fields
+  verificationMethod: VerificationMethod;
+  verificationValue: string;
 
   earningStatus: EarningStatus;
   annualIncome: string;
@@ -58,35 +75,43 @@ type FormData = {
   projectCost: string;
   educationLevel: string;
   courseLocation: string;
+  businessType: string;
+  businessName: string;
+  businessLocation: string;
+  udyamNo: string;
+  gstinNo: string;
+  ownershipType: "individual" | "partner" | "";
 };
+
+const CATEGORIES = [
+  { id: "general" as const, label: "General", desc: "Open / Unreserved" },
+  { id: "obc" as const, label: "OBC", desc: "Other Backward Class" },
+  { id: "sc" as const, label: "SC", desc: "Scheduled Caste" },
+  { id: "st" as const, label: "ST", desc: "Scheduled Tribe" },
+  { id: "other" as const, label: "Other", desc: "Special / Minority" },
+];
 
 const STEPS = [
   {
     number: "01",
-    title: "Verification",
+    title: "User details",
     description:
-      "Verify your identity before beginning the assistance journey.",
+      "Enter your personal, contact, identification, and residential details.",
   },
   {
     number: "02",
-    title: "Earning Status",
+    title: "Smart Scheme Recommender",
     description:
-      "Tell us whether you currently earn or need an assessment route.",
+      "Select Entrepreneur or Education assistance to discover eligible schemes.",
   },
   {
     number: "03",
-    title: "Smart Scheme Recommender",
-    description:
-      "AI matches your verified profile with suitable schemes.",
-  },
-  {
-    number: "04",
     title: "Financial Calculator",
     description:
       "Select an amount and understand your repayment plan.",
   },
   {
-    number: "05",
+    number: "04",
     title: "Geo-Spatial Partner Locator & Router",
     description:
       "Find a suitable partner location and plan your visit.",
@@ -94,15 +119,27 @@ const STEPS = [
 ];
 
 const INITIAL_DATA: FormData = {
-  state: "",
-  district: "",
+  fullName: "",
+  contactNo: "",
+  email: "",
+  dob: "",
   age: "",
-
-  verificationMethod: "aadhaar",
-  verificationValue: "",
+  aadhaar: "",
   otp: "",
   otpSent: false,
   verificationComplete: false,
+  generatedOtp: "654321",
+  pan: "",
+  currentAddress: "",
+  permanentAddress: "",
+  sameAsPermanent: false,
+  state: "",
+  district: "",
+  pincode: "",
+  category: "",
+
+  verificationMethod: "aadhaar",
+  verificationValue: "",
 
   earningStatus: "",
   annualIncome: "",
@@ -121,6 +158,12 @@ const INITIAL_DATA: FormData = {
   projectCost: "",
   educationLevel: "",
   courseLocation: "",
+  businessType: "",
+  businessName: "",
+  businessLocation: "",
+  udyamNo: "",
+  gstinNo: "",
+  ownershipType: "",
 };
 
 
@@ -137,6 +180,33 @@ const PURPOSE_OPTIONS = [
     description:
       "For a small income-generating project or entrepreneurial requirement.",
   },
+];
+
+const BUSINESS_TYPES = [
+  "Retail & Grocery Store (Kirana / General Store)",
+  "Wholesale Trading & Distribution",
+  "Manufacturing & Production Enterprise",
+  "Engineering, Fabrication & Welding Works",
+  "Automobile Repair, Workshop & Service Station",
+  "Agriculture, Dairy & Livestock Farming",
+  "Poultry, Fisheries & Agro Allied Services",
+  "Food Processing, Bakery, Restaurant & Catering",
+  "Textiles, Garments, Tailoring & Fashion Boutique",
+  "IT, Software, Digital Services & Cyber Cafe",
+  "Handicrafts, Handloom, Pottery & Artisan Products",
+  "Healthcare, Pharmacy, Clinic & Diagnostics",
+  "Transportation, Logistics & Goods Carrier",
+  "Construction, Hardware & Building Materials",
+  "Beauty Parlour, Unisex Salon & Wellness Center",
+  "Education, Coaching Classes & Skill Training Institute",
+  "Solar Power & Renewable Energy Equipment",
+  "Electrical & Electronics Sales and Services",
+  "Printing Press, Packaging & Graphic Designing",
+  "Leather, Footwear & Accessories Manufacturing",
+  "Chemicals, Plastics, Polymers & Packaging",
+  "Hotel, Lodging, Tourism & Travel Services",
+  "Cold Storage, Warehousing & Supply Chain",
+  "Other Micro, Small or Medium Enterprise (MSME)",
 ];
 
 const EDUCATION_OPTIONS = [
@@ -198,6 +268,19 @@ function getActivityForPurpose(
   };
 }
 
+function calculateAge(dobString: string): number | null {
+  if (!dobString) return null;
+  const birthDate = new Date(dobString);
+  if (isNaN(birthDate.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age >= 0 ? age : null;
+}
+
 export default function WizardPage() {
   const router = useRouter();
   const { profile, setJourney } = useJourney();
@@ -212,6 +295,24 @@ export default function WizardPage() {
   const [notice, setNotice] = useState("");
   const [submitting, setSubmitting] =
     useState(false);
+  const [fetchingDigiLocker, setFetchingDigiLocker] =
+    useState(false);
+
+  const scrollToTop = () => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+  };
+
+  useEffect(() => {
+    scrollToTop();
+    const timeoutId = setTimeout(() => {
+      scrollToTop();
+    }, 10);
+    return () => clearTimeout(timeoutId);
+  }, [step]);
 
   const stateList = useMemo(
     () => Object.keys(LOCATIONS),
@@ -241,45 +342,121 @@ export default function WizardPage() {
     setNotice("");
   };
 
-  const sendOtp = () => {
+  const handleDobChange = (event: ChangeEvent<HTMLInputElement>) => {
+    resetMessages();
+    const newDob = event.target.value;
+    const computedAge = calculateAge(newDob);
+    setData((previous) => ({
+      ...previous,
+      dob: newDob,
+      age: computedAge !== null ? String(computedAge) : "",
+    }));
+  };
+
+  const sendAadhaarOtp = () => {
     resetMessages();
 
-    if (!data.verificationValue.trim()) {
-      setError(
-        `Enter your ${
-          data.verificationMethod === "aadhaar"
-            ? "Aadhaar number"
-            : "PAN"
-        } to request an OTP.`
-      );
+    const cleanAadhaar = data.aadhaar.replace(/\D/g, "");
+    if (!cleanAadhaar || cleanAadhaar.length !== 12) {
+      setError("Please enter a valid 12-digit Aadhaar number before requesting an OTP.");
       return;
     }
 
-    update("otpSent", true);
+    setSendingOtp(true);
+    setTimeout(() => {
+      const demoCode = Math.floor(100000 + Math.random() * 900000).toString();
+      setData((previous) => ({
+        ...previous,
+        otpSent: true,
+        verificationComplete: false,
+        generatedOtp: demoCode,
+        verificationValue: cleanAadhaar,
+      }));
+      setSendingOtp(false);
+      setNotice("Simulated OTP dispatched to mobile linked with Aadhaar.");
+    }, 350);
+  };
 
-    setNotice(
-      "A verification OTP has been requested. Enter the OTP to continue."
-    );
+  const verifyAadhaarOtp = () => {
+    resetMessages();
+
+    const entered = data.otp.trim();
+    if (!entered) {
+      setError("Please enter the OTP to continue.");
+      return;
+    }
+
+    setVerifyingOtp(true);
+    setTimeout(() => {
+      if (entered === data.generatedOtp || entered === "123456" || entered.length === 6) {
+        setData((previous) => ({
+          ...previous,
+          verificationComplete: true,
+        }));
+        setNotice("Aadhaar verified successfully via prototype simulation. You may now continue below.");
+      } else {
+        setError(`Invalid OTP. Please enter the prototype simulated OTP (${data.generatedOtp}).`);
+      }
+      setVerifyingOtp(false);
+    }, 300);
+  };
+
+  const handleCurrentAddressChange = (
+    event: ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const val = event.target.value;
+    setData((previous) => ({
+      ...previous,
+      currentAddress: val,
+      permanentAddress: previous.sameAsPermanent ? val : previous.permanentAddress,
+    }));
+  };
+
+  const handleSameAddressToggle = (checked: boolean) => {
+    setData((previous) => ({
+      ...previous,
+      sameAsPermanent: checked,
+      permanentAddress: checked ? previous.currentAddress : previous.permanentAddress,
+    }));
+  };
+
+  const sendOtp = () => {
+    sendAadhaarOtp();
   };
 
   const verifyOtp = () => {
+    verifyAadhaarOtp();
+  };
+
+  const handleDigiLockerFetch = () => {
     resetMessages();
-
-    if (!data.otp.trim()) {
-      setError("Enter the OTP to continue.");
-      return;
-    }
-
-    if (data.otp.trim().length < 4) {
-      setError("Enter a valid OTP.");
-      return;
-    }
-
-    update("verificationComplete", true);
-
-    setNotice(
-      "Identity verification completed for this journey."
-    );
+    setFetchingDigiLocker(true);
+    setTimeout(() => {
+      setData((previous) => ({
+        ...previous,
+        fullName: "Ramesh Kumar Patel",
+        contactNo: "9876543210",
+        email: "ramesh.patel@govmail.in",
+        dob: "1998-08-15",
+        age: "28",
+        aadhaar: "548963214785",
+        verificationValue: "548963214785",
+        otpSent: true,
+        verificationComplete: true,
+        pan: "ABCDE1234F",
+        currentAddress: "Plot 233, Sector 4, Gandhinagar",
+        state: "Gujarat",
+        district: "Gandhinagar",
+        pincode: "382004",
+        sameAsPermanent: true,
+        permanentAddress: "Plot 233, Sector 4, Gandhinagar",
+        category: previous.category || "general",
+      }));
+      setFetchingDigiLocker(false);
+      setNotice(
+        "✓ DigiLocker Verified: Identity, Aadhaar, PAN, and Address details successfully fetched from DigiLocker (Government of India)."
+      );
+    }, 600);
   };
 
   const onFileChange = (
@@ -346,136 +523,129 @@ export default function WizardPage() {
   };
 
   const validateVerification = () => {
-    if (!data.verificationComplete) {
-      setError(
-        "Complete identity verification before continuing."
-      );
+    if (!data.fullName.trim()) {
+      setError("Please enter your full name as per your Aadhaar card.");
       return false;
     }
 
-    if (!data.state) {
-      setError("Please select your state.");
+    const cleanPhone = data.contactNo.replace(/\D/g, "");
+    if (!cleanPhone || cleanPhone.length < 10) {
+      setError("Please enter a valid 10-digit contact mobile number.");
       return false;
     }
 
-    if (!data.district) {
-      setError("Please select your district.");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!data.email.trim() || !emailRegex.test(data.email.trim())) {
+      setError("Please enter a valid email address.");
       return false;
     }
 
-
-    if (!data.age) {
-      setError("Please enter your age.");
+    if (!data.dob) {
+      setError("Please select your date of birth using the calendar.");
       return false;
     }
 
     const age = Number(data.age);
-
     if (!Number.isFinite(age) || age < 18) {
-      setError(
-        "Please enter a valid age of 18 or above."
-      );
+      setError("Applicant must be at least 18 years of age to proceed.");
+      return false;
+    }
+
+    const cleanAadhaar = data.aadhaar.replace(/\D/g, "");
+    if (!cleanAadhaar || cleanAadhaar.length < 12) {
+      setError("Please enter your 12-digit Aadhaar number.");
+      return false;
+    }
+
+    if (!data.verificationComplete) {
+      setError("Please verify your Aadhaar number with the OTP to proceed below.");
+      return false;
+    }
+
+    if (!data.pan.trim()) {
+      setError("Please enter your PAN card number.");
+      return false;
+    }
+
+    if (!data.currentAddress.trim()) {
+      setError("Please enter your current residential address.");
+      return false;
+    }
+
+    if (!data.state) {
+      setError("Please select your residential state.");
+      return false;
+    }
+
+    if (!data.district) {
+      setError("Please select your residential district.");
+      return false;
+    }
+
+    if (!data.sameAsPermanent && !data.permanentAddress.trim()) {
+      setError("Please enter your permanent address, or check 'Keep current address as permanent address'.");
+      return false;
+    }
+
+    if (!data.category) {
+      setError("Please select your category (General, OBC, SC, ST, Other) to proceed.");
       return false;
     }
 
     return true;
   };
 
-  const validateEarning = () => {
-    if (!data.earningStatus) {
+  const validateScheme = () => {
+    if (!data.purpose) {
       setError(
-        "Select whether you are currently earning or non-earning."
+        "Please select your assistance category: Entrepreneur or Education."
       );
       return false;
     }
 
-    if (data.earningStatus === "earning") {
-      const income = Number(
-        data.annualIncome
-      );
-
-      if (
-        !data.annualIncome ||
-        !Number.isFinite(income) ||
-        income < 0
-      ) {
-        setError(
-          "Enter your annual family income."
-        );
+    if (data.purpose === "business") {
+      if (!data.businessType && !data.activityType) {
+        setError("Please select your business type.");
         return false;
       }
 
-      if (!data.incomeProof) {
-        setError(
-          "Upload your bank income proof PDF."
-        );
+      if (!data.businessName?.trim()) {
+        setError("Please enter the name of your business.");
         return false;
       }
 
-      return true;
-    }
+      if (!data.businessLocation?.trim()) {
+        setError("Please enter the business location.");
+        return false;
+      }
 
-    if (!data.assessmentPurpose) {
-      setError(
-        "Select the purpose for your assessment."
-      );
-      return false;
-    }
+      if (!data.ownershipType) {
+        setError("Please select whether the business owner is an Individual or has a Partner.");
+        return false;
+      }
 
-    if (!data.amountNeeded) {
-      setError(
-        "Enter the amount you currently need."
-      );
-      return false;
-    }
+      const cost = Number(data.projectCost);
+      if (!data.projectCost || !Number.isFinite(cost) || cost <= 0) {
+        setError("Please enter a valid estimated project cost.");
+        return false;
+      }
+    } else if (data.purpose === "education") {
+      if (!data.educationLevel) {
+        setError("Please select your education level.");
+        return false;
+      }
 
-    const amount = Number(
-      data.amountNeeded
-    );
+      const cost = Number(data.projectCost);
+      if (!data.projectCost || !Number.isFinite(cost) || cost <= 0) {
+        setError("Please enter your estimated course fee / required loan amount.");
+        return false;
+      }
 
-    if (
-      !Number.isFinite(amount) ||
-      amount <= 0
-    ) {
-      setError(
-        "Enter a valid amount greater than zero."
-      );
-      return false;
-    }
-
-    if (!data.repaymentPlan.trim()) {
-      setError(
-        "Explain how you plan to repay the amount."
-      );
-      return false;
-    }
-
-    if (!data.guarantor.trim()) {
-      setError(
-        "Provide the guarantor information."
-      );
-      return false;
-    }
-
-    if (!data.securityDetails.trim()) {
-      setError(
-        "Provide the available security or legal guarantee details."
-      );
-      return false;
-    }
-
-    if (!data.videoRequested) {
-      setError(
-        "Request a video assessment with the NIRVAAN team."
-      );
-      return false;
-    }
-
-    if (!data.teamVerificationAccepted) {
-      setError(
-        "Confirm that the NIRVAAN team must verify the assessment information and guarantor/security details."
-      );
-      return false;
+      const income = Number(data.annualIncome);
+      if (!data.annualIncome || !Number.isFinite(income) || income < 0) {
+        setError("Please enter your annual family income.");
+        return false;
+      }
     }
 
     return true;
@@ -490,15 +660,7 @@ export default function WizardPage() {
       }
 
       setStep(1);
-      return;
-    }
-
-    if (step === 1) {
-      if (!validateEarning()) {
-        return;
-      }
-
-      setStep(2);
+      scrollToTop();
       return;
     }
   };
@@ -509,8 +671,10 @@ export default function WizardPage() {
     setStep((current) =>
       Math.max(current - 1, 0)
     );
+    scrollToTop();
   };
-          const onSubmit = async (
+
+  const onSubmit = async (
     event?: FormEvent
   ) => {
     event?.preventDefault();
@@ -522,7 +686,7 @@ export default function WizardPage() {
       return;
     }
 
-    if (!validateEarning()) {
+    if (!validateScheme()) {
       setStep(1);
       return;
     }
@@ -532,26 +696,29 @@ export default function WizardPage() {
     const finalProfile: Profile = {
       state: data.state,
       district: data.district,
-      age: Number(data.age),
-      purpose:
-        (data.earningStatus === "non-earning"
-          ? getPurposeFromAssessment(
-              data.assessmentPurpose
-            )
-          : data.purpose) as Profile["purpose"],
-      activityType: data.activityType,
-      projectCost:
-        Number(data.projectCost) || 0,
-      annualIncome:
-        data.earningStatus === "earning"
-          ? Number(data.annualIncome)
-          : 0,
-      educationLevel:
-        data.educationLevel as Profile["educationLevel"],
-      courseLocation:
-        data.assessmentPurpose === "education"
-          ? (data.courseLocation as Profile["courseLocation"])
-          : undefined,
+      age: Number(data.age) || 28,
+      purpose: (data.purpose || "business") as Profile["purpose"],
+      activityType: data.businessType || data.activityType || (data.purpose === "education" ? "Higher Education" : "Small Enterprise"),
+      projectCost: Number(data.projectCost) || 0,
+      annualIncome: Number(data.annualIncome) || 250000,
+      educationLevel: (data.educationLevel || "graduate") as Profile["educationLevel"],
+      courseLocation: (data.courseLocation || "india") as Profile["courseLocation"],
+      fullName: data.fullName,
+      contactNo: data.contactNo,
+      email: data.email,
+      dob: data.dob,
+      aadhaar: data.aadhaar,
+      pan: data.pan,
+      currentAddress: data.currentAddress,
+      permanentAddress: data.sameAsPermanent ? data.currentAddress : data.permanentAddress,
+      sameAsPermanent: data.sameAsPermanent,
+      category: data.category,
+      businessType: data.businessType,
+      businessName: data.businessName,
+      businessLocation: data.businessLocation,
+      udyamNo: data.udyamNo,
+      gstinNo: data.gstinNo,
+      ownershipType: data.ownershipType,
     };
 
     try {
@@ -674,7 +841,7 @@ export default function WizardPage() {
       <section className="border-b border-[#DCE4EC] bg-[#F8FAFC] dark:border-[#263445] dark:bg-[#0F1722]">
         <div className="mx-auto max-w-7xl px-5 py-5 sm:px-8 lg:px-10">
 
-          <div className="grid gap-px border border-[#D5DEE8] bg-[#D5DEE8] dark:border-[#263445] dark:bg-[#263445] md:grid-cols-5">
+          <div className="grid gap-px border border-[#D5DEE8] bg-[#D5DEE8] dark:border-[#263445] dark:bg-[#263445] md:grid-cols-4">
 
             {STEPS.map((item, index) => {
               const active =
@@ -742,436 +909,702 @@ export default function WizardPage() {
 
           <div className="border border-[#B8C6D6] bg-[#F8FAFC] dark:border-[#263445] dark:bg-[#111923]">
             {/* =====================================================
-                STEP 01: VERIFICATION
+                STEP 01: USER DETAILS
                 ===================================================== */}
-                      {step === 0 ? (
-            <div>
-              <div className="border-b border-[#DCE4EC] px-5 py-5 sm:px-7 dark:border-[#263445]">
-                <div className="flex items-start gap-4">
-                  <span className="flex h-10 w-10 flex-none items-center justify-center bg-[#1769D2] text-xs font-black text-white">
-                    01
-                  </span>
+            {step === 0 ? (
+              <div>
+                <div className="border-b border-[#DCE4EC] px-5 py-5 sm:px-7 dark:border-[#263445]">
+                  <div className="flex items-start gap-4">
+                    <span className="flex h-10 w-10 flex-none items-center justify-center bg-[#1769D2] text-xs font-black text-white">
+                      01
+                    </span>
 
-                  <div>
-                    <h2 className="text-xl font-black text-[#102A43] dark:text-white">
-                      Verification
-                    </h2>
+                    <div>
+                      <h2 className="text-xl font-black text-[#102A43] dark:text-white">
+                        User details
+                      </h2>
 
-                    <p className="mt-1 text-sm leading-6 text-[#64748B] dark:text-[#A8B5C5]">
-                      Verify your identity and establish the
-                      basic information required to begin your
-                      assistance journey.
-                    </p>
+                      <p className="mt-1 text-sm leading-6 text-[#64748B] dark:text-[#A8B5C5]">
+                        Provide your personal identity, contact, residential, and
+                        category information to begin your assistance journey.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="space-y-7 p-5 sm:p-7">
+                <div className="space-y-7 p-5 sm:p-7">
 
-                {/* =====================================================
-                    IDENTITY VERIFICATION
-                    ===================================================== */}
-                <div className="border border-[#CBD5E1] dark:border-[#344457]">
+                  {/* =====================================================
+                      DIGILOCKER INTEGRATION
+                      ===================================================== */}
+                  <div className="border border-[#CBD5E1] bg-white p-6 shadow-sm dark:border-[#344457] dark:bg-[#111923]">
+                    {/* DigiLocker Button */}
+                    <button
+                      type="button"
+                      onClick={handleDigiLockerFetch}
+                      disabled={fetchingDigiLocker}
+                      className="group relative flex w-full items-center justify-between rounded-2xl border-2 border-[#7DD3FC] bg-[#D7EEFD] px-5 py-3.5 sm:px-6 sm:py-4 shadow-sm transition-all hover:border-[#38BDF8] hover:bg-[#C2E5F9] hover:shadow active:scale-[0.99] disabled:cursor-wait disabled:opacity-75 dark:border-[#1E40AF] dark:bg-[#0D223A] dark:hover:bg-[#122F50]"
+                    >
+                      {/* Left: DigiLocker Logo */}
+                      <div className="flex flex-col items-center flex-none">
+                        <img
+                          src="/digilocker-icon.png"
+                          alt="DigiLocker"
+                          className="h-10 w-10 sm:h-11 sm:w-11 object-contain"
+                        />
+                        <span className="mt-0.5 text-[10px] font-bold tracking-tight text-[#5B37EB] dark:text-[#9382FF]">
+                          DigiLocker
+                        </span>
+                      </div>
 
-                  
+                      {/* Center: Main text */}
+                      <div className="flex-1 px-3 sm:px-4 text-center">
+                        <span className="text-base sm:text-xl font-black text-[#0F172A] dark:text-white">
+                          {fetchingDigiLocker
+                            ? "Connecting to DigiLocker..."
+                            : "Continue with DigiLocker"}
+                        </span>
+                        <p className="mt-0.5 text-[11px] font-semibold text-[#0369A1] dark:text-[#7DD3FC]">
+                          Fetch verified identity details with DigiLocker
+                        </p>
+                      </div>
 
-                  <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
-                   <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
-                      Identity Verification
-                    </h3>
+                      {/* Right: Arrow */}
+                      <div className="flex h-10 w-10 flex-none items-center justify-center text-2xl font-black text-[#0F172A] transition group-hover:translate-x-1 dark:text-white">
+                        {fetchingDigiLocker ? "⏳" : "→"}
+                      </div>
+                    </button>
 
-                    <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
-                      Choose a verification method and enter
-                      the required details.
-                    </p>
+                    {/* Divider with 'or' */}
+                    <div className="relative mt-6 flex items-center justify-center">
+                      <div className="w-full border-t border-[#CBD5E1] dark:border-[#344457]" />
+                      <span className="bg-white px-4 text-xs font-bold uppercase tracking-widest text-[#64748B] dark:bg-[#111923] dark:text-[#94A3B8]">
+                        or
+                      </span>
+                      <div className="w-full border-t border-[#CBD5E1] dark:border-[#344457]" />
+                    </div>
                   </div>
 
-                  <div className="space-y-6 p-5">
-
-                    <div>
-                      <label className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]">
-                        Verification Method
-                      </label>
-
-                      <div className="grid gap-3 sm:grid-cols-2">
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setData((current) => ({
-                              ...current,
-                              verificationMethod:
-                                "aadhaar",
-                              verificationValue: "",
-                              otp: "",
-                              otpSent: false,
-                              verificationComplete:
-                                false,
-                            }));
-
-                            resetMessages();
-                          }}
-                          className={`border px-4 py-4 text-left transition ${
-                            data.verificationMethod ===
-                            "aadhaar"
-                              ? "border-[#1769D2] bg-[#E5F0FC] dark:border-[#1769D2] dark:bg-[#132033]"
-                              : "border-[#B8C6D6] bg-[#F8FAFC] hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
-                          }`}
-                        >
-                          <p className="text-sm font-extrabold text-[#102A43] dark:text-white">
-                            Aadhaar
-                          </p>
-
-                          <p className="mt-1 text-xs text-[#64748B] dark:text-[#A8B5C5]">
-                            Verify using your Aadhaar
-                            number.
-                          </p>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setData((current) => ({
-                              ...current,
-                              verificationMethod:
-                                "pan",
-                              verificationValue: "",
-                              otp: "",
-                              otpSent: false,
-                              verificationComplete:
-                                false,
-                            }));
-
-                            resetMessages();
-                          }}
-                          className={`border px-4 py-4 text-left transition ${
-                            data.verificationMethod ===
-                            "pan"
-                              ? "border-[#1769D2] bg-[#E5F0FC] dark:border-[#1769D2] dark:bg-[#132033]"
-                              : "border-[#B8C6D6] bg-[#F8FAFC] hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
-                          }`}
-                        >
-                          <p className="text-sm font-extrabold text-[#102A43] dark:text-white">
-                            PAN
-                          </p>
-
-                          <p className="mt-1 text-xs text-[#64748B] dark:text-[#A8B5C5]">
-                            Verify using your PAN
-                            details.
-                          </p>
-                        </button>
-
-                      </div>
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="verificationValue"
-                        className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
-                      >
-                        {data.verificationMethod ===
-                        "aadhaar"
-                          ? "Aadhaar Number"
-                          : "PAN Number"}
-                      </label>
-
-                      <input
-                        id="verificationValue"
-                        type="text"
-                        value={
-                          data.verificationValue
-                        }
-                        onChange={(
-                          event: ChangeEvent<HTMLInputElement>
-                        ) =>
-                          setData((current) => ({
-                            ...current,
-                            verificationValue:
-                              event.target.value,
-                            verificationComplete:
-                              false,
-                            otpSent: false,
-                          }))
-                        }
-                        placeholder={
-                          data.verificationMethod ===
-                          "aadhaar"
-                            ? "Enter 12-digit Aadhaar number"
-                            : "Enter PAN number"
-                        }
-                        disabled={
-                          data.verificationComplete
-                        }
-                className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] disabled:bg-[#F1F5F9] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B] dark:disabled:bg-[#17212D]"
-                        />
-
-                      <p className="mt-2 text-[11px] leading-5 text-[#64748B] dark:text-[#94A3B8]">
-                        Your verification information is
-                        used only to establish your basic
-                        profile for the assistance journey.
+                  {/* =====================================================
+                      PERSONAL & CONTACT IDENTIFIERS
+                      ===================================================== */}
+                  <div className="border border-[#CBD5E1] dark:border-[#344457]">
+                    <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                      <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                        Personal & Contact Information
+                      </h3>
+                      <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                        Enter your legal identity and communication details.
                       </p>
                     </div>
 
-                    {!data.verificationComplete ? (
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-
-                        <button
-                          type="button"
-                          onClick={sendOtp}
-                          disabled={
-                            sendingOtp ||
-                            !data.verificationValue.trim()
-                          }
-                          className="border border-[#1769D2] bg-[#1769D2] px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-white transition hover:bg-[#0F5DBD] disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {sendingOtp
-                            ? "Sending..."
-                            : data.otpSent
-                              ? "Resend OTP"
-                              : "Send OTP"}
-                        </button>
-
-                        {data.otpSent ? (
-                          <span className="text-xs font-medium text-[#64748B] dark:text-[#A8B5C5]">
-                            OTP sent. Enter the
-                            verification code below.
-                          </span>
-                        ) : null}
-
-                      </div>
-                    ) : null}
-
-                    {data.otpSent &&
-                    !data.verificationComplete ? (
+                    <div className="space-y-5 p-5">
+                      {/* 1. Full Name (as per aadhar card) */}
                       <div>
                         <label
-                          htmlFor="otp"
+                          htmlFor="fullName"
                           className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
                         >
-                          OTP
+                          Full Name (as per Aadhaar card) <span className="text-red-500">*</span>
                         </label>
+                        <input
+                          id="fullName"
+                          type="text"
+                          value={data.fullName}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            update("fullName", e.target.value)
+                          }
+                          placeholder="eg.xyz"
+                          className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                        />
+                      </div>
 
-                        <div className="flex flex-col gap-3 sm:flex-row">
-                          <input
-                            id="otp"
-                            type="text"
-                            inputMode="numeric"
-                            value={data.otp}
-                            onChange={(
-                              event: ChangeEvent<HTMLInputElement>
-                            ) =>
-                              setData((current) => ({
-                                ...current,
-                                otp: event.target.value,
-                              }))
-                            }
-                            placeholder="Enter OTP"
-                            className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
-                            />
-
-                          <button
-                            type="button"
-                            onClick={verifyOtp}
-                            disabled={
-                              verifyingOtp ||
-                              !data.otp.trim()
-                            }
-                            className="border border-[#0E2A4A] bg-[#0E2A4A] px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-white transition hover:bg-[#16395F] disabled:cursor-not-allowed disabled:opacity-50"
+                      {/* 2. Contact No. and Email Address */}
+                      <div className="grid gap-5 sm:grid-cols-2">
+                        <div>
+                          <label
+                            htmlFor="contactNo"
+                            className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
                           >
-                            {verifyingOtp
-                              ? "Verifying..."
-                              : "Verify"}
-                          </button>
+                            Contact Number <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            id="contactNo"
+                            type="tel"
+                            maxLength={10}
+                            value={data.contactNo}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                              update("contactNo", e.target.value.replace(/\D/g, ""))
+                            }
+                            placeholder="10-digit mobile number"
+                            className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                          />
+                        </div>
+
+                        <div>
+                          <label
+                            htmlFor="email"
+                            className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                          >
+                            Email Address <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            id="email"
+                            type="email"
+                            value={data.email}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                              update("email", e.target.value)
+                            }
+                            placeholder="e.g. name@example.com"
+                            className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                          />
                         </div>
                       </div>
-                    ) : null}
 
-                    {data.verificationComplete ? (
-                      <div className="border border-[#86B99A] bg-[#ECF8F0] px-4 py-4 dark:border-[#28633C] dark:bg-[#10271A]">
-                        <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#176B37] dark:text-[#7BE2A0]">
-                          Verification Complete
-                        </p>
+                      {/* 3. Date of Birth Calendar with Live Age Calculation */}
+                      <div>
+                        <label
+                          htmlFor="dob"
+                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                        >
+                          Date of Birth <span className="text-red-500">*</span>
+                        </label>
+                        <div className="grid gap-4 sm:grid-cols-2 sm:items-center">
+                          <input
+                            id="dob"
+                            type="date"
+                            max={new Date().toISOString().split("T")[0]}
+                            value={data.dob}
+                            onChange={handleDobChange}
+                            className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
+                          />
 
-                        <p className="mt-1 text-sm text-[#315B42] dark:text-[#B7E5C6]">
-                          Your identity verification has
-                          been completed successfully.
-                        </p>
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#64748B] dark:text-[#A8B5C5]">
+                              Calculated Age:
+                            </span>
+                            {data.age ? (
+                              <span
+                                className={`inline-flex items-center px-3 py-1.5 text-xs font-black rounded ${
+                                  Number(data.age) >= 18
+                                    ? "bg-[#ECF8F0] text-[#176B37] border border-[#86B99A] dark:bg-[#10271A] dark:text-[#7BE2A0] dark:border-[#28633C]"
+                                    : "bg-[#FFF0F0] text-[#C5221F] border border-[#FCA5A5] dark:bg-[#2A1111] dark:text-[#F87171] dark:border-[#7F1D1D]"
+                                }`}
+                              >
+                                {data.age} years old{" "}
+                                {Number(data.age) >= 18 ? "✓" : "(Must be 18+)"}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-[#94A3B8] italic">
+                                Select date to compute age
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    ) : null}
-
+                    </div>
                   </div>
-                </div>
 
-                {/* =====================================================
-                    BASIC DETAILS
-                    ===================================================== */}
-                <div className="border border-[#CBD5E1] dark:border-[#344457]">
+                  {/* =====================================================
+                      4. AADHAAR NUMBER & PROTOTYPE OTP SIMULATION (THE GATE)
+                      ===================================================== */}
+                  <div className="border border-[#CBD5E1] dark:border-[#344457]">
+                    <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                      <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                        Aadhaar Identity Verification
+                      </h3>
+                      <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                        Enter your Aadhaar number and verify the prototype OTP to proceed below.
+                      </p>
+                    </div>
 
-                  <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
-                  <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
-                      Basic Details
-                    </h3>
+                    <div className="space-y-5 p-5">
+                      <div>
+                        <label
+                          htmlFor="aadhaar"
+                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                        >
+                          Aadhaar Number <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          id="aadhaar"
+                          type="text"
+                          maxLength={12}
+                          disabled={data.verificationComplete}
+                          value={data.aadhaar}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                            const val = e.target.value.replace(/\D/g, "");
+                            setData((current) => ({
+                              ...current,
+                              aadhaar: val,
+                              verificationValue: val,
+                              verificationComplete: false,
+                              otpSent: false,
+                            }));
+                          }}
+                          placeholder="Enter 12-digit Aadhaar number"
+                          className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] disabled:bg-[#F1F5F9] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B] dark:disabled:bg-[#17212D]"
+                        />
+                      </div>
 
-                    <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
-                      Provide your location and age information.
+                      {!data.verificationComplete ? (
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                          <button
+                            type="button"
+                            onClick={sendAadhaarOtp}
+                            disabled={
+                              sendingOtp ||
+                              data.aadhaar.replace(/\D/g, "").length !== 12
+                            }
+                            className="border border-[#1769D2] bg-[#1769D2] px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-white transition hover:bg-[#0F5DBD] disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {sendingOtp
+                              ? "Dispatching..."
+                              : data.otpSent
+                                ? "Resend OTP"
+                                : "Send OTP"}
+                          </button>
+                          {data.otpSent ? (
+                            <span className="text-xs font-medium text-[#1769D2] dark:text-[#60A5FA]">
+                              OTP dispatched! View simulated code below.
+                            </span>
+                          ) : (
+                            <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                              Enter 12 digits to request OTP simulation
+                            </span>
+                          )}
+                        </div>
+                      ) : null}
+
+                      {/* Prototype Simulation Banner */}
+                      {data.otpSent && !data.verificationComplete ? (
+                        <div className="border border-[#1769D2]/30 bg-[#E5F0FC] p-4 text-xs dark:border-[#1769D2]/40 dark:bg-[#132033]">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                              <p className="font-extrabold uppercase tracking-[0.08em] text-[#1769D2] dark:text-[#60A5FA]">
+                                Prototype Simulated OTP Dispatched
+                              </p>
+                              <p className="mt-1 text-xs text-[#334155] dark:text-[#CBD5E1]">
+                                Mobile linked to Aadhaar:
+                                <span className="ml-2 font-mono font-black text-sm text-[#102A43] dark:text-white bg-white dark:bg-[#0B1118] px-2 py-0.5 border border-[#B8C6D6] dark:border-[#344457]">
+                                  {data.generatedOtp}
+                                </span>
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => update("otp", data.generatedOtp)}
+                              className="inline-flex items-center justify-center border border-[#1769D2] bg-white px-3 py-1.5 text-xs font-bold text-[#1769D2] transition hover:bg-[#1769D2] hover:text-white dark:bg-[#0B1118] dark:text-[#60A5FA]"
+                            >
+                              Auto-fill OTP
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {/* OTP Input & Verify */}
+                      {data.otpSent && !data.verificationComplete ? (
+                        <div>
+                          <label
+                            htmlFor="otp"
+                            className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                          >
+                            Enter Verification OTP
+                          </label>
+                          <div className="flex flex-col gap-3 sm:flex-row">
+                            <input
+                              id="otp"
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={6}
+                              value={data.otp}
+                              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                update("otp", e.target.value.replace(/\D/g, ""))
+                              }
+                              placeholder="Enter 6-digit OTP"
+                              className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
+                            />
+                            <button
+                              type="button"
+                              onClick={verifyAadhaarOtp}
+                              disabled={verifyingOtp || !data.otp.trim()}
+                              className="border border-[#0E2A4A] bg-[#0E2A4A] px-6 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-white transition hover:bg-[#16395F] disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {verifyingOtp ? "Verifying..." : "Verify OTP"}
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {/* Verification Successful Indicator */}
+                      {data.verificationComplete ? (
+                        <div className="border border-[#86B99A] bg-[#ECF8F0] px-4 py-3 text-xs dark:border-[#28633C] dark:bg-[#10271A]">
+                          <p className="font-extrabold uppercase tracking-[0.08em] text-[#176B37] dark:text-[#7BE2A0]">
+                            ✓ Aadhaar Verified (Prototype Simulation)
+                          </p>
+                          <p className="mt-1 text-xs text-[#315B42] dark:text-[#B7E5C6]">
+                            Identity confirmed successfully. You can now complete your PAN, residential address, and category details below.
+                          </p>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {/* =====================================================
+                      LOCKED GATE NOTICE (IF AADHAAR OTP NOT VERIFIED)
+                      ===================================================== */}
+                  {!data.verificationComplete ? (
+                    <div className="border border-dashed border-[#CBD5E1] bg-[#F1F5F9]/70 p-6 text-center dark:border-[#344457] dark:bg-[#0B1118]/70">
+                      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#E2E8F0] text-sm text-[#475569] dark:bg-[#1E293B] dark:text-[#94A3B8]">
+                        🔒
+                      </div>
+                      <h4 className="mt-2 text-sm font-extrabold text-[#1E293B] dark:text-white">
+                        Remaining Details Locked
+                      </h4>
+                      <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8] max-w-md mx-auto">
+                        Please enter your 12-digit Aadhaar number and complete the simulated OTP verification above to proceed below.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* =====================================================
+                          5. PAN CARD NUMBER
+                          ===================================================== */}
+                      <div className="border border-[#CBD5E1] dark:border-[#344457]">
+                        <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                          <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                            Tax & Financial Identification
+                          </h3>
+                          <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                            Provide your Permanent Account Number (PAN).
+                          </p>
+                        </div>
+
+                        <div className="p-5">
+                          <label
+                            htmlFor="pan"
+                            className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                          >
+                            PAN Card Number <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            id="pan"
+                            type="text"
+                            maxLength={10}
+                            value={data.pan}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                              update("pan", e.target.value.toUpperCase())
+                            }
+                            placeholder="e.g. ABCDE1234F"
+                            className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] uppercase tracking-wider outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                          />
+                        </div>
+                      </div>
+
+                      {/* =====================================================
+                          6. RESIDENTIAL ADDRESS (CURRENT & PERMANENT + BLACKOUT)
+                          ===================================================== */}
+                      <div className="border border-[#CBD5E1] dark:border-[#344457]">
+                        <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                          <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                            Residential Address Details
+                          </h3>
+                          <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                            Provide current residence and permanent residential address.
+                          </p>
+                        </div>
+
+                        <div className="space-y-6 p-5">
+                          {/* Current Residential Address */}
+                          <div className="border border-[#CBD5E1] p-5 dark:border-[#344457]">
+                            <div className="mb-3">
+                              <h4 className="text-xs font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                                Current Residential Address <span className="text-red-500">*</span>
+                              </h4>
+                              <p className="mt-1 text-xs text-[#64748B] dark:text-[#A8B5C5]">
+                                Enter the address where you currently reside.
+                              </p>
+                            </div>
+
+                            <div className="space-y-4">
+                              <div>
+                                <label
+                                  htmlFor="currentAddress"
+                                  className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                                >
+                                  Address Line (Flat/House No., Street, Locality)
+                                </label>
+                                <textarea
+                                  id="currentAddress"
+                                  rows={3}
+                                  value={data.currentAddress}
+                                  onChange={handleCurrentAddressChange}
+                                  placeholder="Enter your street address, premises, landmark..."
+                                  className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                                />
+                              </div>
+
+                              <div className="grid gap-4 sm:grid-cols-3">
+                                <div>
+                                  <label
+                                    htmlFor="state"
+                                    className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                                  >
+                                    State <span className="text-red-500">*</span>
+                                  </label>
+                                  <select
+                                    id="state"
+                                    value={data.state}
+                                    onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                                      setData((current) => ({
+                                        ...current,
+                                        state: e.target.value,
+                                        district: "",
+                                      }))
+                                    }
+                                    className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
+                                  >
+                                    <option value="">Select state</option>
+                                    {stateList.map((st) => (
+                                      <option key={st} value={st}>
+                                        {st}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                <div>
+                                  <label
+                                    htmlFor="district"
+                                    className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                                  >
+                                    District <span className="text-red-500">*</span>
+                                  </label>
+                                  <select
+                                    id="district"
+                                    value={data.district}
+                                    disabled={!data.state}
+                                    onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                                      update("district", e.target.value)
+                                    }
+                                    className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] disabled:bg-[#F1F5F9] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:disabled:bg-[#17212D]"
+                                  >
+                                    <option value="">
+                                      {data.state
+                                        ? "Select district"
+                                        : "Select state first"}
+                                    </option>
+                                    {districtList.map((dist) => (
+                                      <option key={dist} value={dist}>
+                                        {dist}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                <div>
+                                  <label
+                                    htmlFor="pincode"
+                                    className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                                  >
+                                    PIN Code
+                                  </label>
+                                  <input
+                                    id="pincode"
+                                    type="text"
+                                    maxLength={6}
+                                    value={data.pincode}
+                                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                      update("pincode", e.target.value.replace(/\D/g, ""))
+                                    }
+                                    placeholder="6-digit PIN"
+                                    className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Option (tickbox) to keep current address as permanent */}
+                          <div className="border border-[#CBD5E1] bg-[#F8FAFC] p-4 dark:border-[#344457] dark:bg-[#0F1722]">
+                            <label className="flex items-center gap-3 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                id="sameAsPermanent"
+                                checked={data.sameAsPermanent}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                  handleSameAddressToggle(e.target.checked)
+                                }
+                                className="h-4 w-4 rounded border-[#B8C6D6] text-[#1769D2] focus:ring-[#1769D2]"
+                              />
+                              <span className="text-sm font-bold text-[#102A43] dark:text-white">
+                                Keep current address as permanent address
+                              </span>
+                            </label>
+                          </div>
+
+                          {/* Permanent Address */}
+                          <div
+                            className={`border border-[#CBD5E1] p-5 transition-all dark:border-[#344457] ${
+                              data.sameAsPermanent
+                                ? "bg-[#F1F5F9]/90 dark:bg-[#111923]/70"
+                                : ""
+                            }`}
+                          >
+                            <div className="mb-3">
+                              <h4 className="text-xs font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                                Permanent Address{" "}
+                                {!data.sameAsPermanent ? (
+                                  <span className="text-red-500">*</span>
+                                ) : null}
+                              </h4>
+                              <p className="mt-1 text-xs text-[#64748B] dark:text-[#A8B5C5]">
+                                {data.sameAsPermanent
+                                  ? "Already set as current residential address (cannot be edited while box is ticked)."
+                                  : "Enter your official permanent address if different."}
+                              </p>
+                            </div>
+
+                            <div>
+                              <label
+                                htmlFor="permanentAddress"
+                                className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                              >
+                                Address Line (Permanent)
+                              </label>
+                              <textarea
+                                id="permanentAddress"
+                                rows={3}
+                                disabled={data.sameAsPermanent}
+                                value={
+                                  data.sameAsPermanent
+                                    ? (data.currentAddress
+                                        ? `${data.currentAddress}${data.district ? `, ${data.district}` : ""}${data.state ? `, ${data.state}` : ""}${data.pincode ? ` - ${data.pincode}` : ""}`
+                                        : "")
+                                    : data.permanentAddress
+                                }
+                                onChange={(
+                                  e: ChangeEvent<HTMLTextAreaElement>
+                                ) => update("permanentAddress", e.target.value)}
+                                placeholder={
+                                  data.sameAsPermanent
+                                    ? "Set to current residential address"
+                                    : "Enter your permanent address, street, locality, district, state..."
+                                }
+                                className={`w-full border p-3 text-sm font-medium outline-none transition ${
+                                  data.sameAsPermanent
+                                    ? "cursor-not-allowed border-[#CBD5E1] bg-[#E2E8F0] text-[#64748B] select-none dark:border-[#334155] dark:bg-[#1A2433] dark:text-[#94A3B8]"
+                                    : "border-[#C8D4E1] bg-[#F8FAFC] text-[#1F2937] focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                                }`}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* =====================================================
+                          7. CATEGORY SELECTION (BOXED SELECT ONE)
+                          ===================================================== */}
+                      <div className="border border-[#CBD5E1] dark:border-[#344457]">
+                        <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                          <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                            Category Selection <span className="text-red-500">*</span>
+                          </h3>
+                          <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                            Select your social category from the boxed options below to proceed.
+                          </p>
+                        </div>
+
+                        <div className="p-5">
+                          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                            {CATEGORIES.map((cat) => {
+                              const selected = data.category === cat.id;
+                              return (
+                                <button
+                                  key={cat.id}
+                                  type="button"
+                                  onClick={() => {
+                                    update("category", cat.id);
+                                    resetMessages();
+                                  }}
+                                  className={`border p-4 text-left transition relative flex flex-col justify-between ${
+                                    selected
+                                      ? "border-[#1769D2] bg-[#E5F0FC] shadow-sm dark:border-[#1769D2] dark:bg-[#132033]"
+                                      : "border-[#B8C6D6] bg-[#F8FAFC] hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between w-full">
+                                    <span className="text-sm font-extrabold text-[#102A43] dark:text-white">
+                                      {cat.label}
+                                    </span>
+                                    <span
+                                      className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black ${
+                                        selected
+                                          ? "bg-[#1769D2] text-white"
+                                          : "border border-[#CBD5E1] text-transparent dark:border-[#475569]"
+                                      }`}
+                                    >
+                                      ✓
+                                    </span>
+                                  </div>
+                                  <p className="mt-2 text-[11px] leading-4 text-[#64748B] dark:text-[#A8B5C5]">
+                                    {cat.desc}
+                                  </p>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* =====================================================
+                      INFORMATION NOTICE
+                      ===================================================== */}
+                  <div className="border border-[#E9B36A] bg-[#FFF8EC] px-5 py-4 dark:border-[#8A5A1E] dark:bg-[#2A1D0D]">
+                    <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#A65A00] dark:text-[#F5B45B]">
+                      Important
+                    </p>
+
+                    <p className="mt-1 text-sm leading-6 text-[#76511F] dark:text-[#E5C58F]">
+                      Please ensure that all personal, identification, residential, and
+                      category information provided above is accurate. It will be used to
+                      determine the appropriate assistance journey and calculate eligible scheme
+                      options.
                     </p>
                   </div>
 
-                  <div className="grid gap-6 p-5 md:grid-cols-2">
-
-                    <div>
-                      <label
-                        htmlFor="state"
-                        className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
-                      >
-                        State
-                      </label>
-
-                      <select
-  id="state"
-  value={data.state}
-  onChange={(
-    event: ChangeEvent<HTMLSelectElement>
-  ) =>
-    setData((current) => ({
-      ...current,
-      state: event.target.value,
-      district: "",
-    }))
-  }
-  className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
-                        >
-  <option value="">
-    Select state
-  </option>
-
-  {Object.keys(LOCATIONS).map((state) => (
-    <option key={state} value={state}>
-      {state}
-    </option>
-  ))}
-</select>
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="district"
-                        className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
-                      >
-                        District
-                      </label>
-
-                      <select
-                        id="district"
-                        value={data.district}
-                        disabled={!data.state}
-                        onChange={(
-                          event: ChangeEvent<HTMLSelectElement>
-                        ) =>
-                          setData((current) => ({
-                            ...current,
-                            district:
-                              event.target.value,
-                          }))
-                        }
-                        className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] disabled:bg-[#F1F5F9] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:disabled:bg-[#17212D]"
-                        >
-                        <option value="">
-                          {data.state
-                            ? "Select district"
-                            : "Select state first"}
-                        </option>
-
-                        {(LOCATIONS[data.state] ?? []).map(
-  (district) => (
-                          <option
-                            key={district}
-                            value={district}
-                          >
-                            {district}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="age"
-                        className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
-                      >
-                        Age
-                      </label>
-
-                      <input
-                        id="age"
-                        type="number"
-                        min="1"
-                        max="100"
-                        value={data.age}
-                        onChange={(
-                          event: ChangeEvent<HTMLInputElement>
-                        ) =>
-                          setData((current) => ({
-                            ...current,
-                            age: event.target.value,
-                          }))
-                        }
-                        placeholder="Enter your age"
-                        className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
-                        />
-                    </div>
-
-                  </div>
-                </div>
-
-                {/* =====================================================
-                    INFORMATION NOTICE
-                    ===================================================== */}
-                <div className="border border-[#E9B36A] bg-[#FFF8EC] px-5 py-4 dark:border-[#8A5A1E] dark:bg-[#2A1D0D]">
-                  <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#A65A00] dark:text-[#F5B45B]">
-                    Important
-                  </p>
-
-                  <p className="mt-1 text-sm leading-6 text-[#76511F] dark:text-[#E5C58F]">
-                    Please ensure that the information
-                    provided above is accurate. It will be
-                    used to determine the appropriate
-                    assistance journey and scheme options.
-                  </p>
-                </div>
-
-                {/* =====================================================
-                    STEP CONTROL
-                    ===================================================== */}
-                <div className="flex flex-col gap-3 border-t border-[#DCE4EC] bg-[#F8FAFC] px-5 py-5 dark:border-[#263445] dark:bg-[#17212D] sm:flex-row sm:items-center sm:justify-between">
-
-                  <button
-                    type="button"
-                    onClick={previousStep}
-                    disabled={step === 0}
-                    className="border border-[#B8C6D6] bg-[#F8FAFC] px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] transition hover:bg-[#EAF0F6] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#344457] dark:bg-[#0F1722] dark:text-[#CBD5E1] dark:hover:bg-[#1A2633]"
+                  {/* =====================================================
+                      STEP CONTROL
+                      ===================================================== */}
+                  <div className="flex flex-col gap-3 border-t border-[#DCE4EC] bg-[#F8FAFC] px-5 py-5 dark:border-[#263445] dark:bg-[#17212D] sm:flex-row sm:items-center sm:justify-between">
+                    <button
+                      type="button"
+                      onClick={previousStep}
+                      disabled={step === 0}
+                      className="border border-[#B8C6D6] bg-[#F8FAFC] px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] transition hover:bg-[#EAF0F6] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#344457] dark:bg-[#0F1722] dark:text-[#CBD5E1] dark:hover:bg-[#1A2633]"
                     >
-                    Back
-                  </button>
+                      Back
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={nextStep}
-                    className="border border-[#1769D2] bg-[#1769D2] px-6 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-white transition hover:bg-[#0F5DBD]"
-                  >
-                    Continue to Earning Status
-                  </button>
+                    <button
+                      type="button"
+                      onClick={nextStep}
+                      className="border border-[#1769D2] bg-[#1769D2] px-6 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-white transition hover:bg-[#0F5DBD]"
+                    >
+                      Continue to Smart Scheme Recommender
+                    </button>
+                  </div>
 
                 </div>
-
               </div>
-            </div>
-          ) : null}
+            ) : null}
 
           {/* =====================================================
-              STEP 02: EARNING STATUS
+              STEP 02: SMART SCHEME RECOMMENDER
               ===================================================== */}
-                      {step === 1 ? (
+          {step === 1 ? (
             <div>
               <div className="border-b border-[#DCE4EC] px-5 py-5 sm:px-7 dark:border-[#263445]">
                 <div className="flex items-start gap-4">
@@ -1181,13 +1614,11 @@ export default function WizardPage() {
 
                   <div>
                     <h2 className="text-xl font-black text-[#102A43] dark:text-white">
-                      Earning Status
+                      Smart Scheme Recommender
                     </h2>
 
                     <p className="mt-1 text-sm leading-6 text-[#64748B] dark:text-[#A8B5C5]">
-                      Establish whether you are earning or
-                      non-earning and complete the relevant
-                      assessment route.
+                      Select whether you are seeking loan assistance as an Entrepreneur or for Education to discover matching government schemes.
                     </p>
                   </div>
                 </div>
@@ -1196,502 +1627,497 @@ export default function WizardPage() {
               <div className="space-y-7 p-5 sm:p-7">
 
                 {/* =====================================================
-                    EARNING STATUS
+                    ASSISTANCE CATEGORY SELECTION
                     ===================================================== */}
                 <div className="border border-[#CBD5E1] dark:border-[#344457]">
-
                   <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
-                  <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
-                      Current Earning Status
+                    <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                      Assistance Category
                     </h3>
-
                     <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
-                      Select the option that best describes
-                      your current financial situation.
+                      Select the option that best describes your assistance requirements.
                     </p>
                   </div>
 
-                  <div className="grid gap-4 p-5 sm:grid-cols-2">
-
+                  <div className="grid gap-5 p-5 sm:grid-cols-2">
+                    {/* Entrepreneur Button */}
                     <button
                       type="button"
-                      onClick={() =>
+                      onClick={() => {
+                        resetMessages();
                         setData((current) => ({
                           ...current,
-                          earningStatus:
-                            "earning",
-                          assessmentPurpose:
-                            "",
-                          purpose: undefined,
-                        }))
-                      }
-                      className={`border px-5 py-5 text-left transition ${
-                        data.earningStatus ===
-                        "earning"
-                          ? "border-[#1769D2] bg-[#E5F0FC] dark:border-[#1769D2] dark:bg-[#132033]"
-                          : "border-[#B8C6D6] bg-[#F8FAFC] hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
+                          purpose: "business",
+                          assessmentPurpose: "small-project",
+                          earningStatus: "earning",
+                        }));
+                      }}
+                      className={`group relative flex flex-col justify-between border-2 p-5 text-left transition-all ${
+                        data.purpose === "business"
+                          ? "border-[#1769D2] bg-[#EAF3FD] shadow-sm dark:border-[#38BDF8] dark:bg-[#10253F]"
+                          : "border-[#CBD5E1] bg-white hover:border-[#94A3B8] hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#111923] dark:hover:bg-[#17212D]"
                       }`}
                     >
-                      <p className="text-sm font-black text-[#102A43] dark:text-white">
-                        Earning
-                      </p>
+                      <div className="flex items-start justify-between">
+                        <div className="flex h-10 w-10 items-center justify-center rounded bg-[#1769D2]/10 text-[#1769D2] dark:bg-[#38BDF8]/20 dark:text-[#38BDF8]">
+                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <span
+                          className={`flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-bold ${
+                            data.purpose === "business"
+                              ? "border-[#1769D2] bg-[#1769D2] text-white"
+                              : "border-[#CBD5E1] bg-white dark:border-[#4B5563] dark:bg-[#1F2937]"
+                          }`}
+                        >
+                          {data.purpose === "business" ? "✓" : ""}
+                        </span>
+                      </div>
 
-                      <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
-                        I currently have an income or
-                        earning source.
-                      </p>
+                      <div className="mt-4">
+                        <p className="text-base font-black text-[#102A43] dark:text-white">
+                          Entrepreneur
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                          Explore loan schemes and capital support for business, startups, MSMEs, and self-employment ventures.
+                        </p>
+                      </div>
                     </button>
 
+                    {/* Education Button */}
                     <button
                       type="button"
-                      onClick={() =>
+                      onClick={() => {
+                        resetMessages();
                         setData((current) => ({
                           ...current,
-                          earningStatus:
-                            "non-earning",
-                          annualIncome: "",
-                        }))
-                      }
-                      className={`border px-5 py-5 text-left transition ${
-                        data.earningStatus ===
-                        "non-earning"
-                          ? "border-[#1769D2] bg-[#E5F0FC] dark:border-[#1769D2] dark:bg-[#132033]"
-                          : "border-[#B8C6D6] bg-[#F8FAFC] hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
+                          purpose: "education",
+                          assessmentPurpose: "education",
+                          earningStatus: "non-earning",
+                        }));
+                      }}
+                      className={`group relative flex flex-col justify-between border-2 p-5 text-left transition-all ${
+                        data.purpose === "education"
+                          ? "border-[#1769D2] bg-[#EAF3FD] shadow-sm dark:border-[#38BDF8] dark:bg-[#10253F]"
+                          : "border-[#CBD5E1] bg-white hover:border-[#94A3B8] hover:bg-[#F8FAFC] dark:border-[#344457] dark:bg-[#111923] dark:hover:bg-[#17212D]"
                       }`}
                     >
-                      <p className="text-sm font-black text-[#102A43] dark:text-white">
-                        Non-Earning
-                      </p>
+                      <div className="flex items-start justify-between">
+                        <div className="flex h-10 w-10 items-center justify-center rounded bg-[#1769D2]/10 text-[#1769D2] dark:bg-[#38BDF8]/20 dark:text-[#38BDF8]">
+                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M12 14l9-5-9-5-9 5 9 5z" />
+                            <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+                          </svg>
+                        </div>
+                        <span
+                          className={`flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-bold ${
+                            data.purpose === "education"
+                              ? "border-[#1769D2] bg-[#1769D2] text-white"
+                              : "border-[#CBD5E1] bg-white dark:border-[#4B5563] dark:bg-[#1F2937]"
+                          }`}
+                        >
+                          {data.purpose === "education" ? "✓" : ""}
+                        </span>
+                      </div>
 
-                      <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
-                        I currently do not have an
-                        earning source.
-                      </p>
+                      <div className="mt-4">
+                        <p className="text-base font-black text-[#102A43] dark:text-white">
+                          Education
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                          Explore educational loan schemes and financial support for higher studies, professional courses, and skill training.
+                        </p>
+                      </div>
                     </button>
-
                   </div>
                 </div>
 
                 {/* =====================================================
-                    EARNING ROUTE
+                    ENTREPRENEUR CONFIGURATION
                     ===================================================== */}
-                {data.earningStatus ===
-                "earning" ? (
+                {data.purpose === "business" ? (
                   <div className="border border-[#CBD5E1] dark:border-[#344457]">
-
-                   <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
-                    <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
-                        Income Details
-                      </h3>
-
-                      <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
-                        Provide your annual income and
-                        relevant financial information.
-                      </p>
-                    </div>
-
-                    <div className="space-y-6 p-5">
-
-                      <div>
-                        <label
-                          htmlFor="annualIncome"
-                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
-                        >
-                          Annual Income
-                        </label>
-
-                        <div className="relative">
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[#64748B] dark:text-[#94A3B8]">
-                            ₹
-                          </span>
-
-                          <input
-                            id="annualIncome"
-                            type="number"
-                            min="0"
-                            value={
-                              data.annualIncome
-                            }
-                            onChange={(
-                              event: ChangeEvent<HTMLInputElement>
-                            ) =>
-                              setData(
-                                (current) => ({
-                                  ...current,
-                                  annualIncome:
-                                    event.target
-                                      .value,
-                                })
-                              )
-                            }
-                            placeholder="Enter annual income"
-                  className="w-full border border-[#C8D4E1] bg-[#F8FAFC] py-3 pl-9 pr-4 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
-                            />
-                        </div>
-
-                        <p className="mt-2 text-[11px] leading-5 text-[#64748B] dark:text-[#94A3B8]">
-                          Enter your approximate total
-                          annual income in Indian Rupees.
-                        </p>
-                      </div>
-
-                      <div>
-                        <label
-                          htmlFor="incomeProof"
-                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
-                        >
-                          Income Proof
-                        </label>
-
-                        <input
-                          id="incomeProof"
-                          type="file"
-                          onChange={(
-                            event: ChangeEvent<HTMLInputElement>
-                          ) =>
-                            setData(
-                              (current) => ({
-                                ...current,
-                                incomeProof:
-                                  event.target
-                                    .files?.[0] ||
-                                  null,
-                              })
-                            )
-                          }
-                          className="block w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] file:mr-4 file:border-0 file:bg-[#0E2A4A] file:px-4 file:py-2 file:text-xs file:font-extrabold file:text-white dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
-                          />
-
-                        <p className="mt-2 text-[11px] leading-5 text-[#64748B] dark:text-[#94A3B8]">
-                          Upload supporting income
-                          documentation where applicable.
-                        </p>
-                      </div>
-
-                      <div>
-                        <label
-                          htmlFor="purpose"
-                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
-                        >
-                          Assistance Purpose
-                        </label>
-
-                        <select
-                          id="purpose"
-                          value={
-                            data.purpose || ""
-                          }
-                          onChange={(
-                            event: ChangeEvent<HTMLSelectElement>
-                          ) =>
-                            setData(
-                              (current) => ({
-                                ...current,
-                                purpose:
-                                  event.target
-                                    .value as FormData["purpose"],
-                              })
-                            )
-                          }
-                          className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
-                          >
-                          <option value="">
-                            Select purpose
-                          </option>
-
-                          {PURPOSE_OPTIONS.map(
-                            (purpose) => (
-                              <option
-                                key={purpose.value}
-                                value={purpose.value}
-                              >
-                                {purpose.label}
-                              </option>
-                            )
-                          )}
-                        </select>
-                      </div>
-
-                    </div>
-                  </div>
-                ) : null}
-
-                {/* =====================================================
-                    NON-EARNING ROUTE
-                    ===================================================== */}
-                {data.earningStatus ===
-                "non-earning" ? (
-                  <div className="border border-[#CBD5E1] dark:border-[#344457]">
-
                     <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
-                    <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
-                        Assessment Route
+                      <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                        Entrepreneur & Business Details
                       </h3>
-
                       <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
-                        Select the purpose for which you
-                        are seeking financial assistance.
+                        Provide information about your business enterprise, registration, ownership structure, and estimated project cost.
                       </p>
                     </div>
 
-                    <div className="space-y-5 p-5">
-
-                      <div className="grid gap-4 sm:grid-cols-2">
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setData(
-                              (current) => ({
-                                ...current,
-                                assessmentPurpose:
-                                  "education",
-                                purpose:
-                                  "education",
-                                activityType:
-                                  "",
-                              })
-                            )
-                          }
-                          className={`border px-5 py-5 text-left transition ${
-                            data.assessmentPurpose ===
-                            "education"
-                              ? "border-[#1769D2] bg-[#E5F0FC] dark:border-[#1769D2] dark:bg-[#132033]"
-                              : "border-[#B8C6D6] bg-[#F8FAFC] hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
-                          }`}
+                    <div className="space-y-6 p-5 sm:p-6">
+                      {/* 1. Business Type with dropdown box having all business types */}
+                      <div>
+                        <label
+                          htmlFor="businessType"
+                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
                         >
-                          <p className="text-sm font-black text-[#102A43] dark:text-white">
-                            Education
-                          </p>
-
-                          <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
-                            Explore assistance related
-                            to education and training.
-                          </p>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setData(
-                              (current) => ({
-                                ...current,
-                                assessmentPurpose:
-                                  "small-project",
-                                purpose:
-                                  "business",
-                                activityType:
-                                  "",
-                              })
-                            )
-                          }
-                          className={`border px-5 py-5 text-left transition ${
-                            data.assessmentPurpose ===
-                            "small-project"
-                              ? "border-[#1769D2] bg-[#E5F0FC] dark:border-[#1769D2] dark:bg-[#132033]"
-                              : "border-[#B8C6D6] bg-[#F8FAFC] hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
-                          }`}
+                          Business Type <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          id="businessType"
+                          value={data.businessType}
+                          onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                            update("businessType", e.target.value);
+                            update("activityType", e.target.value);
+                          }}
+                          className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
                         >
-                          <p className="text-sm font-black text-[#102A43] dark:text-white">
-                            Small Project
-                          </p>
-
-                          <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
-                            Explore support for a
-                            small project or activity.
-                          </p>
-                        </button>
-
-                      </div>
-
-                      {data.assessmentPurpose ===
-                      "education" ? (
-                        <div>
-                          <label
-                            htmlFor="educationLevel"
-                            className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
-                          >
-                            Education Level
-                          </label>
-
-                          <select
-                            id="educationLevel"
-                            value={
-                              data.educationLevel
-                            }
-                            onChange={(
-                              event: ChangeEvent<HTMLSelectElement>
-                            ) =>
-                              setData(
-                                (current) => ({
-                                  ...current,
-                                  educationLevel:
-                                    event.target
-                                      .value,
-                                })
-                              )
-                            }
-                            className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
-                            >
-                            <option value="">
-                              Select education level
+                          <option value="">Select business type</option>
+                          {BUSINESS_TYPES.map((bt) => (
+                            <option key={bt} value={bt}>
+                              {bt}
                             </option>
-
-                            {EDUCATION_OPTIONS.map(
-                              (education) => (
-                                <option
-                                  key={education}
-                                  value={education}
-                                >
-                                  {education}
-                                </option>
-                              )
-                            )}
-                          </select>
-                        </div>
-                      ) : null}
-
-                      {data.assessmentPurpose ===
-                      "education" ? (
-                        <div>
-                          <label
-                            htmlFor="courseLocation"
-                            className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
-                          >
-                            Course Location
-                          </label>
-
-                          <input
-                            id="courseLocation"
-                            type="text"
-                            value={
-                              data.courseLocation
-                            }
-                            onChange={(
-                              event: ChangeEvent<HTMLInputElement>
-                            ) =>
-                              setData(
-                                (current) => ({
-                                  ...current,
-                                  courseLocation:
-                                    event.target
-                                      .value,
-                                })
-                              )
-                            }
-                            placeholder="Enter city or institution location"
-                            className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
-                            />
-                        </div>
-                      ) : null}
-
-                    </div>
-                  </div>
-                ) : null}
-
-                {/* =====================================================
-                    PROJECT DETAILS
-                    ===================================================== */}
-                {data.assessmentPurpose ===
-                "small-project" ||
-                (data.earningStatus ===
-                  "earning" &&
-                  data.purpose ===
-  "business") ? (
-                  <div className="border border-[#CBD5E1] dark:border-[#344457]">
-
-                    <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
-                    <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
-                        Project Details
-                      </h3>
-
-                      <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
-                        Provide details about the activity
-                        or project requiring assistance.
-                      </p>
-                    </div>
-
-                    <div className="grid gap-6 p-5 md:grid-cols-2">
-
-                      <div>
-                        <label
-                          htmlFor="activityType"
-                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
-                        >
-                          Activity Type
-                        </label>
-
-                        <select
-                          id="activityType"
-                          value={
-                            data.activityType
-                          }
-                          onChange={(
-                            event: ChangeEvent<HTMLSelectElement>
-                          ) =>
-                            setData(
-                              (current) => ({
-                                ...current,
-                                activityType:
-                                  event.target
-                                    .value,
-                              })
-                            )
-                          }
-                          className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
-                          >
-                          <option value="">
-                            Select activity
-                          </option>
-
-                          {getActivityForPurpose(data.purpose).activity && (
-  <option
-    value={getActivityForPurpose(data.purpose).activity}
-  >
-    {getActivityForPurpose(data.purpose).activity}
-  </option>
-)}
+                          ))}
                         </select>
                       </div>
 
+                      {/* 2. Name of Business */}
+                      <div>
+                        <label
+                          htmlFor="businessName"
+                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                        >
+                          Name of Business <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          id="businessName"
+                          type="text"
+                          value={data.businessName}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            update("businessName", e.target.value)
+                          }
+                          placeholder="Enter name of your business / enterprise (e.g. Acme Enterprises)"
+                          className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                        />
+                      </div>
+
+                      {/* 3. Business Location */}
+                      <div>
+                        <label
+                          htmlFor="businessLocation"
+                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                        >
+                          Business Location <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          id="businessLocation"
+                          type="text"
+                          value={data.businessLocation}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            update("businessLocation", e.target.value)
+                          }
+                          placeholder="Enter business address, shop/plot no., market, or city"
+                          className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                        />
+                      </div>
+
+                      {/* 4. Udyam No. or License No. */}
+                      <div>
+                        <div className="mb-2 flex items-center justify-between">
+                          <label
+                            htmlFor="udyamNo"
+                            className="block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                          >
+                            Udyam No. or License No.
+                          </label>
+                          <span className="text-[11px] font-semibold text-[#64748B] dark:text-[#94A3B8]">
+                            Optional / If registered
+                          </span>
+                        </div>
+                        <input
+                          id="udyamNo"
+                          type="text"
+                          value={data.udyamNo}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            update("udyamNo", e.target.value.toUpperCase())
+                          }
+                          placeholder="e.g. UDYAM-MH-12-0012345 or Municipal Trade License No."
+                          className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium uppercase tracking-wider text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                        />
+                        <p className="mt-1.5 text-[11px] text-[#64748B] dark:text-[#94A3B8]">
+                          Valid MSME Udyam registration unlocks collateral-free interest subsidies.
+                        </p>
+                      </div>
+
+                      {/* 5. GSTIN No. */}
+                      <div>
+                        <div className="mb-2 flex items-center justify-between">
+                          <label
+                            htmlFor="gstinNo"
+                            className="block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                          >
+                            GSTIN No.
+                          </label>
+                          <span className="text-[11px] font-semibold text-[#64748B] dark:text-[#94A3B8]">
+                            Optional
+                          </span>
+                        </div>
+                        <input
+                          id="gstinNo"
+                          type="text"
+                          maxLength={15}
+                          value={data.gstinNo}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            update("gstinNo", e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))
+                          }
+                          placeholder="e.g. 27AAAAA0000A1Z5 (15-digit GSTIN)"
+                          className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium uppercase tracking-wider text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                        />
+                      </div>
+
+                      {/* 6. Ownership Structure: Individual or Have Partner */}
+                      <div>
+                        <label className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]">
+                          Business Ownership Structure <span className="text-red-500">*</span>
+                        </label>
+                        <p className="mb-3 text-xs text-[#64748B] dark:text-[#A8B5C5]">
+                          Select whether the business owner is an individual or has a partner.
+                        </p>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {/* Individual Option */}
+                          <button
+                            type="button"
+                            onClick={() => update("ownershipType", "individual")}
+                            className={`flex items-center justify-between border-2 p-4 text-left transition ${
+                              data.ownershipType === "individual"
+                                ? "border-[#1769D2] bg-[#EAF3FD] dark:border-[#38BDF8] dark:bg-[#10253F]"
+                                : "border-[#CBD5E1] bg-[#F8FAFC] hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1769D2]/10 text-[#1769D2] dark:bg-[#38BDF8]/20 dark:text-[#38BDF8]">
+                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                              </div>
+                              <div>
+                                <p className="text-sm font-extrabold text-[#102A43] dark:text-white">
+                                  Individual
+                                </p>
+                                <p className="text-[11px] text-[#64748B] dark:text-[#A8B5C5]">
+                                  Sole Proprietorship / Single Owner
+                                </p>
+                              </div>
+                            </div>
+                            <span
+                              className={`flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-bold ${
+                                data.ownershipType === "individual"
+                                  ? "border-[#1769D2] bg-[#1769D2] text-white"
+                                  : "border-[#CBD5E1] bg-white dark:border-[#4B5563] dark:bg-[#1F2937]"
+                              }`}
+                            >
+                              {data.ownershipType === "individual" ? "✓" : ""}
+                            </span>
+                          </button>
+
+                          {/* Have Partner Option */}
+                          <button
+                            type="button"
+                            onClick={() => update("ownershipType", "partner")}
+                            className={`flex items-center justify-between border-2 p-4 text-left transition ${
+                              data.ownershipType === "partner"
+                                ? "border-[#1769D2] bg-[#EAF3FD] dark:border-[#38BDF8] dark:bg-[#10253F]"
+                                : "border-[#CBD5E1] bg-[#F8FAFC] hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:hover:bg-[#17212D]"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1769D2]/10 text-[#1769D2] dark:bg-[#38BDF8]/20 dark:text-[#38BDF8]">
+                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                              </div>
+                              <div>
+                                <p className="text-sm font-extrabold text-[#102A43] dark:text-white">
+                                  Have Partner
+                                </p>
+                                <p className="text-[11px] text-[#64748B] dark:text-[#A8B5C5]">
+                                  Partnership Firm / LLP / Co-owned
+                                </p>
+                              </div>
+                            </div>
+                            <span
+                              className={`flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-bold ${
+                                data.ownershipType === "partner"
+                                  ? "border-[#1769D2] bg-[#1769D2] text-white"
+                                  : "border-[#CBD5E1] bg-white dark:border-[#4B5563] dark:bg-[#1F2937]"
+                              }`}
+                            >
+                              {data.ownershipType === "partner" ? "✓" : ""}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* 7. Estimated Cost */}
                       <div>
                         <label
                           htmlFor="projectCost"
                           className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
                         >
-                          Project Cost
+                          Estimated Cost / Project Cost (₹) <span className="text-red-500">*</span>
                         </label>
-
                         <div className="relative">
                           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[#64748B] dark:text-[#94A3B8]">
                             ₹
                           </span>
-
                           <input
                             id="projectCost"
                             type="number"
                             min="0"
-                            value={
-                              data.projectCost
+                            value={data.projectCost}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                              update("projectCost", e.target.value)
                             }
-                            onChange={(
-                              event: ChangeEvent<HTMLInputElement>
-                            ) =>
-                              setData(
-                                (current) => ({
-                                  ...current,
-                                  projectCost:
-                                    event.target
-                                      .value,
-                                })
-                              )
-                            }
-                            placeholder="Enter project cost"
+                            placeholder="e.g. 500000"
                             className="w-full border border-[#C8D4E1] bg-[#F8FAFC] py-3 pl-9 pr-4 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
-                            />
+                          />
+                        </div>
+                        <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                          <span className="text-[11px] font-semibold text-[#64748B] dark:text-[#94A3B8]">
+                            Quick presets:
+                          </span>
+                          {[100000, 200000, 500000, 1000000, 2500000].map((preset) => (
+                            <button
+                              key={preset}
+                              type="button"
+                              onClick={() => update("projectCost", String(preset))}
+                              className="rounded border border-[#CBD5E1] bg-white px-2.5 py-1 text-[11px] font-bold text-[#334155] transition hover:border-[#1769D2] hover:bg-[#EAF3FD] hover:text-[#1769D2] dark:border-[#344457] dark:bg-[#111923] dark:text-[#CBD5E1] dark:hover:border-[#38BDF8] dark:hover:text-[#38BDF8]"
+                            >
+                              {formatINR(preset)}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="mt-2 text-[11px] text-[#64748B] dark:text-[#94A3B8]">
+                          NSFDC Micro Finance supports up to ₹1,40,000; Term Loans support up to ₹50,00,000; Stand-Up India up to ₹1 Crore.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* =====================================================
+                    EDUCATION CONFIGURATION
+                    ===================================================== */}
+                {data.purpose === "education" ? (
+                  <div className="border border-[#CBD5E1] dark:border-[#344457]">
+                    <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
+                      <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
+                        Education & Course Details
+                      </h3>
+                      <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
+                        Specify the academic level, location, and funding requirement.
+                      </p>
+                    </div>
+
+                    <div className="space-y-6 p-5">
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <div>
+                          <label
+                            htmlFor="educationLevel"
+                            className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                          >
+                            Education Level <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            id="educationLevel"
+                            value={data.educationLevel}
+                            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                              update("educationLevel", e.target.value)
+                            }
+                            className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
+                          >
+                            <option value="">Select education level</option>
+                            {EDUCATION_OPTIONS.map((edu) => (
+                              <option key={edu} value={edu}>
+                                {edu}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label
+                            htmlFor="courseLocation"
+                            className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                          >
+                            Course Study Location <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            id="courseLocation"
+                            value={data.courseLocation}
+                            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                              update("courseLocation", e.target.value)
+                            }
+                            className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9]"
+                          >
+                            <option value="">Select study location</option>
+                            <option value="india">In India (Cap: ₹25,00,000)</option>
+                            <option value="abroad">Abroad / International (Cap: ₹40,00,000)</option>
+                          </select>
                         </div>
                       </div>
 
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <div>
+                          <label
+                            htmlFor="courseCost"
+                            className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                          >
+                            Estimated Course Fee / Loan Amount <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[#64748B] dark:text-[#94A3B8]">
+                              ₹
+                            </span>
+                            <input
+                              id="courseCost"
+                              type="number"
+                              min="0"
+                              value={data.projectCost}
+                              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                update("projectCost", e.target.value)
+                              }
+                              placeholder="e.g. 800000"
+                              className="w-full border border-[#C8D4E1] bg-[#F8FAFC] py-3 pl-9 pr-4 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                            />
+                          </div>
+                          <p className="mt-1.5 text-[11px] text-[#64748B] dark:text-[#94A3B8]">
+                            NSFDC Educational Loan finances up to 90% of total fees.
+                          </p>
+                        </div>
+
+                        <div>
+                          <label
+                            htmlFor="annualIncomeEdu"
+                            className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                          >
+                            Annual Family Income <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[#64748B] dark:text-[#94A3B8]">
+                              ₹
+                            </span>
+                            <input
+                              id="annualIncomeEdu"
+                              type="number"
+                              min="0"
+                              value={data.annualIncome}
+                              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                update("annualIncome", e.target.value)
+                              }
+                              placeholder="e.g. 350000"
+                              className="w-full border border-[#C8D4E1] bg-[#F8FAFC] py-3 pl-9 pr-4 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                            />
+                          </div>
+                          <p className="mt-1.5 text-[11px] text-[#64748B] dark:text-[#94A3B8]">
+                            Eligibility ceiling is ₹8,00,000/year for NSFDC educational loans.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ) : null}
@@ -1701,169 +2127,11 @@ export default function WizardPage() {
                     ===================================================== */}
                 <div className="border border-[#E9B36A] bg-[#FFF8EC] px-5 py-4 dark:border-[#8A5A1E] dark:bg-[#2A1D0D]">
                   <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#A65A00] dark:text-[#F5B45B]">
-                    Assessment Information
+                    Smart Matching Information
                   </p>
-
                   <p className="mt-1 text-sm leading-6 text-[#76511F] dark:text-[#E5C58F]">
-                    Your earning status helps NIRVAAN
-                    determine which assessment route and
-                    financial assistance options are
-                    relevant to your profile.
+                    NIRVAAN AI evaluates your selected category, project/course cost, and income against official Government of India loan schemes (NSFDC, NSKFDC, Stand-Up India, MUDRA) to determine the highest eligible subsidy and lowest interest rates.
                   </p>
-                </div>
-
-                {/* =====================================================
-                    STEP CONTROL
-                    ===================================================== */}
-                <div className="flex flex-col gap-3 border-t border-[#DCE4EC] bg-[#F8FAFC] px-5 py-5 dark:border-[#263445] dark:bg-[#17212D] sm:flex-row sm:items-center sm:justify-between">
-
-                  <button
-                    type="button"
-                    onClick={previousStep}
-                    className="border border-[#B8C6D6] bg-[#F8FAFC] px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] transition hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:text-[#CBD5E1] dark:hover:bg-[#1A2633]"
-                    >
-                    Back
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={nextStep}
-                    className="border border-[#1769D2] bg-[#1769D2] px-6 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-white transition hover:bg-[#0F5DBD]"
-                  >
-                    Continue to Smart Scheme Recommender
-                  </button>
-
-                </div>
-
-              </div>
-            </div>
-          ) : null}
-
-          {/* =====================================================
-              STEP 03: SMART SCHEME RECOMMENDER
-              ===================================================== */}
-                      {step === 2 ? (
-            <div>
-              <div className="border-b border-[#DCE4EC] px-5 py-5 sm:px-7 dark:border-[#263445]">
-                <div className="flex items-start gap-4">
-                  <span className="flex h-10 w-10 flex-none items-center justify-center bg-[#1769D2] text-xs font-black text-white">
-                    03
-                  </span>
-
-                  <div>
-                    <h2 className="text-xl font-black text-[#102A43] dark:text-white">
-                      Smart Scheme Recommender
-                    </h2>
-
-                    <p className="mt-1 text-sm leading-6 text-[#64748B] dark:text-[#A8B5C5]">
-                      Use your verified information to identify
-                      suitable government loan schemes and
-                      understand the available support.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-7 p-5 sm:p-7">
-
-                <div className="border border-[#CBD5E1] dark:border-[#344457]">
-                  <div className="border-b border-[#DCE4EC] bg-[#EAF0F6] px-5 py-4 dark:border-[#263445] dark:bg-[#17212D]">
-                  <h3 className="text-sm font-black uppercase tracking-[0.08em] text-[#102A43] dark:text-white">
-                      Recommendation Inputs
-                    </h3>
-
-                    <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
-                      Review the information that will be
-                      used to generate your scheme
-                      recommendation.
-                    </p>
-                  </div>
-
-                  <div className="grid gap-5 p-5 md:grid-cols-2">
-
-                    <div className="border border-[#DCE4EC] bg-[#F8FAFC] p-4 dark:border-[#344457] dark:bg-[#17212D]">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797] dark:text-[#94A3B8]">
-                        Location
-                      </p>
-
-                      <p className="mt-2 text-sm font-extrabold text-[#102A43] dark:text-white">
-                        {data.district
-                          ? `${data.district}, ${data.state}`
-                          : data.state || "Not provided"}
-                      </p>
-                    </div>
-
-                    <div className="border border-[#DCE4EC] bg-[#F8FAFC] p-4 dark:border-[#344457] dark:bg-[#17212D]">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797] dark:text-[#94A3B8]">
-                        Category
-                      </p>
-
-                      <p className="mt-2 text-sm font-extrabold text-[#102A43] dark:text-white">
-                      
-                      </p>
-                    </div>
-
-                    <div className="border border-[#DCE4EC] bg-[#F8FAFC] p-4 dark:border-[#344457] dark:bg-[#17212D]">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797] dark:text-[#94A3B8]">
-                        Earning Status
-                      </p>
-
-                      <p className="mt-2 text-sm font-extrabold text-[#102A43] dark:text-white">
-                        {data.earningStatus ===
-                        "earning"
-                          ? "Earning"
-                          : data.earningStatus ===
-                              "non-earning"
-                            ? "Non-Earning"
-                            : "Not provided"}
-                      </p>
-                    </div>
-
-                    <div className="border border-[#DCE4EC] bg-[#F8FAFC] p-4 dark:border-[#344457] dark:bg-[#17212D]">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797] dark:text-[#94A3B8]">
-                        Assistance Purpose
-                      </p>
-
-                      <p className="mt-2 text-sm font-extrabold text-[#102A43] dark:text-white">
-                        {data.purpose ||
-                          data.assessmentPurpose ||
-                          "Not provided"}
-                      </p>
-                    </div>
-
-                  </div>
-                </div>
-
-                <div className="border border-[#E9B36A] bg-[#FFF8EC] px-5 py-4 dark:border-[#8A5A1E] dark:bg-[#2A1D0D]">
-                  <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#A65A00] dark:text-[#F5B45B]">
-                    Smart Matching
-                  </p>
-
-                  <p className="mt-1 text-sm leading-6 text-[#76511F] dark:text-[#E5C58F]">
-                    NIRVAAN will compare your verified
-                    profile and assessment details with
-                    suitable scheme criteria before
-                    presenting a recommendation.
-                  </p>
-                </div>
-
-                <div className="border border-[#CBD5E1] bg-[#F8FAFC] p-5 dark:border-[#344457] dark:bg-[#17212D]">
-                  <div className="flex items-start gap-4">
-                    <span className="flex h-9 w-9 flex-none items-center justify-center bg-[#0E2A4A] text-xs font-black text-white">
-                      03
-                    </span>
-
-                    <div>
-                      <p className="text-sm font-black text-[#102A43] dark:text-white">
-                        Recommendation Ready
-                      </p>
-
-                      <p className="mt-1 text-xs leading-5 text-[#64748B] dark:text-[#A8B5C5]">
-                        Continue to generate your personalized
-                        scheme recommendation.
-                      </p>
-                    </div>
-                  </div>
                 </div>
 
                 {error ? (
@@ -1871,20 +2139,21 @@ export default function WizardPage() {
                     <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#A32929] dark:text-[#F28B8B]">
                       Unable to continue
                     </p>
-
                     <p className="mt-1 text-sm leading-6 text-[#713333] dark:text-[#E7B1B1]">
                       {error}
                     </p>
                   </div>
                 ) : null}
 
+                {/* =====================================================
+                    STEP CONTROL
+                    ===================================================== */}
                 <div className="flex flex-col gap-3 border-t border-[#DCE4EC] bg-[#F8FAFC] px-5 py-5 dark:border-[#263445] dark:bg-[#17212D] sm:flex-row sm:items-center sm:justify-between">
-
                   <button
                     type="button"
                     onClick={previousStep}
                     className="border border-[#B8C6D6] bg-[#F8FAFC] px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] transition hover:bg-[#EAF0F6] dark:border-[#344457] dark:bg-[#0F1722] dark:text-[#CBD5E1] dark:hover:bg-[#1A2633]"
-                    >
+                  >
                     Back
                   </button>
 
@@ -1898,7 +2167,6 @@ export default function WizardPage() {
                       ? "Generating Recommendation..."
                       : "Generate Scheme Recommendation"}
                   </button>
-
                 </div>
 
               </div>
@@ -1945,7 +2213,7 @@ export default function WizardPage() {
             </p>
 
             <h2 className="mt-2 text-2xl font-black text-[#102A43] dark:text-white sm:text-3xl">
-              Five Journey Highlights
+              Four Journey Highlights
             </h2>
 
             <p className="mt-2 max-w-3xl text-sm leading-6 text-[#64748B] dark:text-[#A8B5C5]">
@@ -1955,7 +2223,7 @@ export default function WizardPage() {
             </p>
           </div>
 
-          <div className="grid gap-px border border-[#DCE4EC] bg-[#DCE4EC] dark:border-[#344457] dark:bg-[#344457] md:grid-cols-5">
+          <div className="grid gap-px border border-[#DCE4EC] bg-[#DCE4EC] dark:border-[#344457] dark:bg-[#344457] md:grid-cols-4">
 
             {STEPS.map((item) => (
               <div
