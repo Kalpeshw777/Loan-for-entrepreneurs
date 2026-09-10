@@ -107,9 +107,29 @@ function ensureDataDir() {
   } catch {}
 }
 
+function isValidUser(u: any): boolean {
+  if (!u || typeof u !== "object") return false;
+  const name = String(u.full_name || "").trim().toLowerCase();
+  if (!name || name.length < 2) return false;
+  if (
+    name === "applicant" ||
+    name === "eg.xyz" ||
+    name === "test" ||
+    name === "demo" ||
+    name === "null" ||
+    name === "undefined"
+  ) {
+    return false;
+  }
+  const contact = String(u.contact_no || "").replace(/\D/g, "");
+  if (!contact || contact.length < 10) return false;
+  if (/^(\d)\1{9}$/.test(contact) || contact === "1234567890") return false;
+  return true;
+}
+
 function readStore(): UserRecord[] {
   if (memoryStore && memoryStore.length > 0) {
-    return memoryStore;
+    return memoryStore.filter(isValidUser);
   }
 
   ensureDataDir();
@@ -118,8 +138,9 @@ function readStore(): UserRecord[] {
       const raw = fs.readFileSync(JSON_FILE, "utf-8");
       const parsed = JSON.parse(raw || "[]");
       if (Array.isArray(parsed) && parsed.length > 0) {
-        memoryStore = parsed;
-        return parsed;
+        const clean = parsed.filter(isValidUser);
+        memoryStore = clean;
+        return clean;
       }
     }
   } catch (err) {
@@ -133,10 +154,11 @@ function readStore(): UserRecord[] {
 }
 
 function writeStore(records: UserRecord[]) {
-  memoryStore = records;
+  const clean = records.filter(isValidUser);
+  memoryStore = clean;
   ensureDataDir();
   try {
-    fs.writeFileSync(JSON_FILE, JSON.stringify(records, null, 2), "utf-8");
+    fs.writeFileSync(JSON_FILE, JSON.stringify(clean, null, 2), "utf-8");
   } catch (err) {
     // In read-only serverless lambdas, memoryStore retains the data
     console.warn("Serverless disk write notice (handled via memoryStore):", err);
@@ -148,37 +170,50 @@ export async function getAllUsers(): Promise<UserRecord[]> {
 }
 
 export async function insertUser(user: Partial<UserRecord>): Promise<UserRecord> {
-  const newUser: UserRecord = {
-    id: user.id || `usr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-    full_name: user.full_name || "Applicant",
-    contact_no: user.contact_no || "",
-    email: user.email || "",
-    dob: user.dob || "",
-    aadhaar: user.aadhaar ? user.aadhaar.replace(/.(?=.{4})/g, "X") : "",
-    pan: user.pan || "",
-    state: user.state || "",
-    district: user.district || "",
-    category: user.category || "General",
-    purpose: user.purpose || "business",
-    business_name: user.business_name || "",
-    business_type: user.business_type || "",
-    business_location: user.business_location || "",
-    udyam_no: user.udyam_no || "",
-    gstin_no: user.gstin_no || "",
-    ownership_type: user.ownership_type || "individual",
-    project_cost: Number(user.project_cost || 0),
-    status: user.status || "VERIFIED",
-    created_at: new Date().toISOString(),
+  const current = readStore();
+
+  const cleanDigits = (user.contact_no || "").replace(/\D/g, "").slice(-10);
+  const cleanEmail = (user.email || "").trim().toLowerCase();
+
+  // Deduplicate: Find existing record by ID, phone, or email
+  const existingIndex = current.findIndex((u) => {
+    if (user.id && u.id === user.id) return true;
+    if (cleanDigits && u.contact_no && u.contact_no.replace(/\D/g, "").slice(-10) === cleanDigits) return true;
+    if (cleanEmail && u.email && u.email.trim().toLowerCase() === cleanEmail) return true;
+    return false;
+  });
+
+  const existing = existingIndex >= 0 ? current[existingIndex] : null;
+
+  const resolvedRecord: UserRecord = {
+    id: existing?.id || user.id || `usr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    full_name: user.full_name || existing?.full_name || "Applicant",
+    contact_no: cleanDigits || existing?.contact_no || "",
+    email: user.email || existing?.email || "",
+    dob: user.dob || existing?.dob || "",
+    aadhaar: user.aadhaar ? user.aadhaar.replace(/.(?=.{4})/g, "X") : existing?.aadhaar || "",
+    pan: user.pan || existing?.pan || "",
+    state: user.state || existing?.state || "",
+    district: user.district || existing?.district || "",
+    category: user.category || existing?.category || "General",
+    purpose: user.purpose || existing?.purpose || "business",
+    business_name: user.business_name || existing?.business_name || "",
+    business_type: user.business_type || existing?.business_type || "",
+    business_location: user.business_location || existing?.business_location || "",
+    udyam_no: user.udyam_no || existing?.udyam_no || "",
+    gstin_no: user.gstin_no || existing?.gstin_no || "",
+    ownership_type: user.ownership_type || existing?.ownership_type || "individual",
+    project_cost: Number(user.project_cost || existing?.project_cost || 0),
+    status: user.status || existing?.status || "VERIFIED",
+    created_at: existing?.created_at || new Date().toISOString(),
   };
 
-  const current = readStore();
-  const existingIndex = current.findIndex((u) => u.id === newUser.id);
   if (existingIndex >= 0) {
-    current[existingIndex] = newUser;
+    current[existingIndex] = resolvedRecord;
   } else {
-    current.unshift(newUser);
+    current.unshift(resolvedRecord);
   }
 
   writeStore(current);
-  return newUser;
+  return resolvedRecord;
 }

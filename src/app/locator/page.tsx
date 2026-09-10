@@ -12,14 +12,15 @@ import type {
   SchemeId,
 } from "@/lib/types";
 
-const MapClient = dynamic(() => import("@/components/MapClient"), {
+const PartnerMap = dynamic(() => import("@/components/PartnerMap"), {
   ssr: false,
   loading: () => (
     <div className="flex h-full items-center justify-center bg-[#F8FAFC] text-sm font-bold text-[#0F5FC5]">
-      Loading satellite map...
+      Loading Interactive Partner Map...
     </div>
   ),
 });
+
 
 const SCHEME_LABELS: Record<SchemeId, string> = {
   pmegp: "PMEGP (Govt Subsidy)",
@@ -1084,36 +1085,28 @@ export default function LocatorPage() {
             <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-base font-extrabold text-[#111827]">
-                  Satellite Partner Map
+                  Interactive Partner Map
                 </h2>
 
                 <p className="mt-1 text-xs font-medium text-[#64748B]">
-                  Partner locations across India are shown on
-                  the map.
+                  Partner locations across India with zero API key required.
                 </p>
               </div>
 
               <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
-                Satellite view
+                Free Geographic View
               </span>
             </div>
 
             <div className="relative h-[480px] overflow-hidden border border-[#CBD5E1] bg-[#F8FAFC] lg:h-[620px]">
-              <MapClient
+              <PartnerMap
                 partners={partners}
-                center={mapCenter}
-                zoom={
-                  selectedId
-                    ? 14
-                    : districtFilter !== "All"
-                      ? 9
-                      : 5
-                }
                 selectedId={selectedId}
                 userLocation={userLocation}
-                onSelect={handleSelectPartner}
+                onSelectPartner={(p) => handleSelectPartner(p.id)}
               />
             </div>
+
 
             {/* Map information bar */}
             <div className="grid grid-cols-1 border-x border-b border-[#CBD5E1] bg-white sm:grid-cols-3">

@@ -19,18 +19,58 @@ interface SchemeItem {
 
 /**
  * Fallback generator when GROQ_API_KEY is not configured or Groq API is unavailable.
- * Matches user query against the verified mockSchemes database to provide accurate grounding.
+ * Matches user query against the verified mockSchemes database to provide accurate grounding,
+ * or provides comprehensive entrepreneurial & financial guidance.
  */
 function generateFallbackReply(query: string): string {
   const q = query.toLowerCase().trim();
   const schemes: SchemeItem[] = Array.isArray(schemeData) ? schemeData : [];
 
-  // If query is very generic or greeting
-  if (q.includes("hello") || q.includes("hi") || q.includes("help") || q === "") {
+  // Greetings
+  if (q.includes("hello") || q.includes("hi") || q.includes("hey") || q === "") {
     return (
-      "Hello! I am your Scheme & Loan Assistant. You can ask me about eligible loan schemes, " +
-      "interest rates, grants (0% interest), subsidy options, documents required, or assistance for SC/ST/OBC, " +
-      "women entrepreneurs, startups, farmers, and students."
+      "Hello! I am Nirvaan AI, your financial and business advisor. " +
+      "You can ask me about eligible government loan schemes, 0% interest grants, " +
+      "how to register your business (Udyam, GST, Pvt Ltd), CIBIL score requirements, or step-by-step startup guidance."
+    );
+  }
+
+  // General Entrepreneurship & Business Topics Fallback
+  if (q.includes("register") || q.includes("company") || q.includes("incorporate") || q.includes("pvt ltd") || q.includes("llp") || q.includes("sole proprietorship")) {
+    return (
+      "**How to Register a Business in India:**\n\n" +
+      "1. **Choose a Structure:** Sole Proprietorship (simplest), LLP (flexible partnership), or Private Limited (best for venture funding).\n" +
+      "2. **Obtain DSC & DIN:** Digital Signature Certificate and Director Identification Number from the Ministry of Corporate Affairs (MCA).\n" +
+      "3. **Name Approval & SPICe+ Form:** File via MCA portal (mca.gov.in) which integrates PAN, TAN, EPFO, ESIC, and bank account opening in one step.\n" +
+      "4. **MSME / Udyam Registration:** Free online registration at **udyamregistration.gov.in** to unlock concessional loans, priority lending, and collateral waivers."
+    );
+  }
+
+  if (q.includes("gst") || q.includes("tax") || q.includes("gstin")) {
+    return (
+      "**GST (Goods and Services Tax) Registration Guide:**\n\n" +
+      "• **Threshold Limit:** Mandatory if aggregate turnover exceeds ₹40 Lakhs for goods (₹20 Lakhs for special states) or ₹20 Lakhs for services (₹10 Lakhs for special states).\n" +
+      "• **Voluntary Registration:** Recommended for B2B startups to claim Input Tax Credit (ITC) and sell on interstate e-commerce platforms.\n" +
+      "• **Application Portal:** 100% free and online at **gst.gov.in** using your PAN, Aadhaar, business address proof, and bank statement."
+    );
+  }
+
+  if (q.includes("cibil") || q.includes("credit score") || q.includes("score")) {
+    return (
+      "**CIBIL & Credit Score for Loans:**\n\n" +
+      "• **Ideal Score:** A score of **750+** is generally preferred by Indian banks for instant loan approval and the lowest interest rates.\n" +
+      "• **For Scores Below 700:** You can still qualify under special government schemes (like PM SVANidhi or CGTMSE collateral-free lending) or micro-finance programs.\n" +
+      "• **Tips to Improve:** Pay existing credit card bills on time, keep credit utilization below 30%, and avoid multiple hard loan inquiries simultaneously."
+    );
+  }
+
+  if (q.includes("business plan") || q.includes("project report") || q.includes("pitch")) {
+    return (
+      "**Key Elements of a Bank Loan Project Report / Business Plan:**\n\n" +
+      "1. **Executive Summary:** Business concept, promoter profile, and funding requested.\n" +
+      "2. **Market & Industry Analysis:** Target customer segment, competitors, and demand projections.\n" +
+      "3. **Technical & Operational Feasibility:** Machinery, raw materials, manufacturing process, and location.\n" +
+      "4. **Financial Projections (3–5 Years):** Projected Balance Sheet, Profit & Loss statement, Break-even analysis, and Debt Service Coverage Ratio (DSCR > 1.5 is favored by banks)."
     );
   }
 
@@ -92,28 +132,36 @@ function generateFallbackReply(query: string): string {
     return tokens.length > 0 && tokens.some((t) => text.includes(t));
   });
 
-  if (matched.length === 0) {
-    return "This scheme isn't in our current database.";
+  if (matched.length > 0) {
+    const list = matched.slice(0, 3).map((s) => (
+      `• **${s.name}** (${s.category})\n` +
+      `  - **Provider:** ${s.provider}\n` +
+      `  - **Max Amount:** ${s.maxAmount} | **Interest Rate:** ${s.interestRate}\n` +
+      `  - **Eligibility:** ${s.eligibility}\n` +
+      `  - **Processing Time:** ${s.processingTime}\n` +
+      `  - **Required Documents:** ${s.documents.join(", ")}`
+    )).join("\n\n");
+
+    return `Here are the matching schemes from our verified database:\n\n${list}`;
   }
 
-  const list = matched.slice(0, 3).map((s) => (
-    `• **${s.name}** (${s.category})\n` +
-    `  - **Provider:** ${s.provider}\n` +
-    `  - **Max Amount:** ${s.maxAmount} | **Interest Rate:** ${s.interestRate}\n` +
-    `  - **Eligibility:** ${s.eligibility}\n` +
-    `  - **Processing Time:** ${s.processingTime}\n` +
-    `  - **Required Documents:** ${s.documents.join(", ")}`
-  )).join("\n\n");
-
-  return `Here are the matching schemes from our verified database:\n\n${list}`;
+  // Broad helpful answer when neither keyword nor scheme matches directly
+  return (
+    "I am here to help you with loan schemes, grants, subsidies, and business setup! " +
+    "You can ask me specific questions like:\n" +
+    "• *'Which schemes offer 0% interest grants?'*\n" +
+    "• *'What are the eligibility criteria for women entrepreneurs?'*\n" +
+    "• *'How do I register an MSME on Udyam?'*\n" +
+    "• *'How can I prepare a project report for a bank loan?'*"
+  );
 }
 
 export async function POST(request: Request) {
+  let message = "";
   try {
     const body = await request.json().catch(() => ({}));
 
     // Extract user question from message or messages array
-    let message = "";
     if (typeof body.message === "string" && body.message.trim()) {
       message = body.message.trim();
     } else if (Array.isArray(body.messages) && body.messages.length > 0) {
@@ -125,7 +173,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error: "Message is required.",
-          reply: "Please type a question about government loan schemes or grants.",
+          reply: "Please type a question about government loan schemes, grants, or starting a business.",
         },
         { status: 400 }
       );
@@ -148,18 +196,17 @@ export async function POST(request: Request) {
       });
     }
 
-    // Prepare system prompt with the full mock scheme dataset
-    const systemPrompt = `You are a helpful and authoritative loan and scheme assistant.
-Your job is to answer user questions about financial assistance, loans, grants, and subsidies ONLY using the verified scheme dataset provided below.
+    // Prepare system prompt with the full scheme dataset AND full conversational AI capability
+    const systemPrompt = `You are Nirvaan AI, an intelligent, authoritative, and helpful financial & entrepreneurship advisor built for NIRVAAN (India's Loan & Scheme Assistance Portal).
 
-VERIFIED SCHEME DATABASE:
+VERIFIED GOVERNMENT SCHEME DATABASE (Official Featured Schemes):
 ${JSON.stringify(schemeData, null, 2)}
 
-STRICT OPERATING INSTRUCTIONS:
-1. Grounding: Answer the user's question strictly and exclusively using the scheme data provided above.
-2. If the user asks about a scheme, category, or requirement that is NOT covered in the provided database above, you MUST explicitly state: "This scheme isn't in our current database."
-3. Accuracy: Accurately state interest rates, max amounts, eligibility criteria, required documents, and processing times from the dataset.
-4. Formatting: Keep your answers clear, concise, and structured with bullet points where appropriate.`;
+OPERATING GUIDELINES:
+1. Grounded Scheme Matching: When the user asks about specific government loan schemes, grants, 0% interest subsidies, eligibility criteria, required documents, or processing times that match schemes in the database above, prioritize these verified schemes and provide exact figures (rates, caps, docs).
+2. Broad AI Knowledge for Entrepreneurship & Business: When the user asks about general business topics (e.g. how to start a business, company formation [Pvt Ltd, LLP, Sole Proprietorship], MSME Udyam registration, GST filing, business plans, pitch decks, budgeting, marketing, accounting, CIBIL score improvement, or banking terms), DO NOT refuse or say it's not in the database! Answer thoroughly, practically, and helpfully using your full AI knowledge.
+3. Other Government Schemes & Subsidies: If the user asks about an Indian government loan scheme or grant not in the 16-scheme featured dataset (such as PM Mudra Yojana, PMEGP, Stand-Up India, PM SVANidhi, Startup India Seed Fund, Credit Guarantee CGTMSE, NABARD loans, or state subsidies), provide accurate, detailed information about that scheme, eligibility, and official application portals (like janSamarth.in, udyamregistration.gov.in, kviconline.gov.in), and note that they can also apply for NIRVAAN's fast-track partner schemes.
+4. Formatting: Keep responses professional, warm, structured with bullet points, and easy for an Indian entrepreneur or citizen to read. Never answer with "This scheme isn't in our current database" for general queries.`;
 
     // Call Groq API with llama-3.3-70b-versatile
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -174,7 +221,7 @@ STRICT OPERATING INSTRUCTIONS:
           { role: "system", content: systemPrompt },
           { role: "user", content: message },
         ],
-        temperature: 0.2,
+        temperature: 0.3,
         max_tokens: 1024,
       }),
       signal: AbortSignal.timeout(15000),
@@ -194,7 +241,7 @@ STRICT OPERATING INSTRUCTIONS:
     const data = await response.json();
     const reply =
       data?.choices?.[0]?.message?.content ||
-      "This scheme isn't in our current database.";
+      generateFallbackReply(message);
 
     return NextResponse.json({
       reply,
@@ -206,8 +253,7 @@ STRICT OPERATING INSTRUCTIONS:
     console.error("Chat API error:", error);
 
     // Friendly fallback instead of 500 error
-    const fallbackReply =
-      "I’m having trouble connecting to the AI service right now. Please try again in a moment.";
+    const fallbackReply = generateFallbackReply(message);
 
     return NextResponse.json({
       reply: fallbackReply,

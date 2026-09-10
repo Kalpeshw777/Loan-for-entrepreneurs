@@ -1050,7 +1050,7 @@ export default function WizardPage() {
                           onChange={(e: ChangeEvent<HTMLInputElement>) =>
                             update("fullName", e.target.value)
                           }
-                          placeholder="eg.xyz"
+                          placeholder="e.g. Rajesh Kumar Sharma"
                           className="w-full border border-[#C8D4E1] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
                         />
                       </div>

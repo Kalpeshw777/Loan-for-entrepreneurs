@@ -41,26 +41,83 @@ export async function GET() {
 // POST /api/users - Save new user / applicant profile
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
+
+    const fullName = String(body.fullName || body.full_name || "").trim();
+    const contactNo = String(body.contactNo || body.contact_no || "").trim();
+
+    // Check for garbage / placeholder full_name
+    const FORBIDDEN_NAMES = new Set([
+      "applicant",
+      "eg.xyz",
+      "test",
+      "testing",
+      "demo",
+      "null",
+      "undefined",
+      "none",
+      "na",
+      "n/a",
+      "xyz",
+      "abc",
+      "asdf",
+      "qwerty",
+      "sample",
+      "user",
+    ]);
+
+    const nameLower = fullName.toLowerCase();
+    if (
+      !fullName ||
+      fullName.length < 2 ||
+      FORBIDDEN_NAMES.has(nameLower) ||
+      !/[a-zA-Z]/.test(fullName)
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid applicant name. Please provide a valid full name as per official government ID.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check for valid 10-digit contact number
+    const cleanDigits = contactNo.replace(/\D/g, "");
+    if (
+      !cleanDigits ||
+      cleanDigits.length < 10 ||
+      /^(\d)\1{9}$/.test(cleanDigits) || // 0000000000, 1111111111, etc.
+      cleanDigits === "1234567890" ||
+      cleanDigits === "0123456789"
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid contact number. Please provide a valid 10-digit mobile number.",
+        },
+        { status: 400 }
+      );
+    }
 
     const userData = {
       id: body.id,
-      full_name: body.fullName || body.full_name || "Applicant",
-      contact_no: body.contactNo || body.contact_no || "",
-      email: body.email || "",
-      dob: body.dob || "",
-      aadhaar: body.aadhaar,
-      pan: body.pan || "",
-      state: body.state || "",
-      district: body.district || "",
-      category: body.category || "General",
-      purpose: body.purpose || "business",
-      business_name: body.businessName || body.business_name || "",
-      business_type: body.businessType || body.business_type || "",
-      business_location: body.businessLocation || body.business_location || "",
-      udyam_no: body.udyamNo || body.udyam_no || "",
-      gstin_no: body.gstinNo || body.gstin_no || "",
-      ownership_type: body.ownershipType || body.ownership_type || "individual",
+      full_name: fullName,
+      contact_no: cleanDigits.slice(-10),
+      email: String(body.email || "").trim(),
+      dob: String(body.dob || "").trim(),
+      aadhaar: body.aadhaar ? String(body.aadhaar) : undefined,
+      pan: String(body.pan || "").trim().toUpperCase(),
+      state: String(body.state || "").trim(),
+      district: String(body.district || "").trim(),
+      category: String(body.category || "General").trim(),
+      purpose: String(body.purpose || "business").trim(),
+      business_name: String(body.businessName || body.business_name || "").trim(),
+      business_type: String(body.businessType || body.business_type || "").trim(),
+      business_location: String(body.businessLocation || body.business_location || "").trim(),
+      udyam_no: String(body.udyamNo || body.udyam_no || "").trim().toUpperCase(),
+      gstin_no: String(body.gstinNo || body.gstin_no || "").trim().toUpperCase(),
+      ownership_type: String(body.ownershipType || body.ownership_type || "individual").trim(),
       project_cost: Number(body.projectCost || body.project_cost || 0),
       status: "VERIFIED",
     };
