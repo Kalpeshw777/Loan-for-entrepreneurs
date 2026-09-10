@@ -1,29 +1,6 @@
 import { NextResponse } from "next/server";
-import fs from "node:fs";
-import path from "node:path";
+import { getAllUsers, insertUser } from "@/lib/db";
 import { supabase, isSupabaseConfigured } from "@/lib/supabaseClient";
-
-const LOCAL_USERS_FILE = path.join(process.cwd(), "src", "data", "users.json");
-
-function readLocalUsers(): any[] {
-  try {
-    if (fs.existsSync(LOCAL_USERS_FILE)) {
-      const data = fs.readFileSync(LOCAL_USERS_FILE, "utf-8");
-      return JSON.parse(data || "[]");
-    }
-  } catch (err) {
-    console.error("Failed to read local users:", err);
-  }
-  return [];
-}
-
-function writeLocalUsers(users: any[]) {
-  try {
-    fs.writeFileSync(LOCAL_USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
-  } catch (err) {
-    console.error("Failed to write local users:", err);
-  }
-}
 
 // GET /api/users - Fetch registered users
 export async function GET() {
@@ -37,20 +14,23 @@ export async function GET() {
       if (!error && data) {
         return NextResponse.json({
           database: "supabase",
+          engine: "Supabase Cloud PostgreSQL",
           count: data.length,
           users: data,
         });
       }
     }
 
-    // Fallback to local storage
-    const localUsers = readLocalUsers();
+    // Direct SQLite Database Engine
+    const users = await getAllUsers();
     return NextResponse.json({
-      database: "local-fallback",
-      count: localUsers.length,
-      users: localUsers,
+      database: "sqlite",
+      engine: "SQLite Relational Database (SQL.js / Disk-Persistent)",
+      count: users.length,
+      users,
     });
   } catch (error: any) {
+    console.error("GET /api/users error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to fetch users" },
       { status: 500 }
@@ -63,17 +43,17 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const newUser = {
-      id: body.id || `usr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    const userData = {
+      id: body.id,
       full_name: body.fullName || body.full_name || "Applicant",
       contact_no: body.contactNo || body.contact_no || "",
       email: body.email || "",
       dob: body.dob || "",
-      aadhaar: body.aadhaar ? body.aadhaar.replace(/.(?=.{4})/g, "X") : "", // mask Aadhaar for privacy
+      aadhaar: body.aadhaar,
       pan: body.pan || "",
       state: body.state || "",
       district: body.district || "",
-      category: body.category || "",
+      category: body.category || "General",
       purpose: body.purpose || "business",
       business_name: body.businessName || body.business_name || "",
       business_type: body.businessType || body.business_type || "",
@@ -82,42 +62,29 @@ export async function POST(request: Request) {
       gstin_no: body.gstinNo || body.gstin_no || "",
       ownership_type: body.ownershipType || body.ownership_type || "individual",
       project_cost: Number(body.projectCost || body.project_cost || 0),
-      created_at: new Date().toISOString(),
+      status: "VERIFIED",
     };
 
-    // If Supabase is connected, insert into Supabase PostgreSQL
+    // Save to SQLite database
+    const savedUser = await insertUser(userData);
+
+    // If Supabase is also configured, mirror insert to Cloud Postgres
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from("users").insert([newUser]).select();
-
-      if (!error) {
-        return NextResponse.json({
-          success: true,
-          database: "supabase",
-          user: data ? data[0] : newUser,
-        });
-      }
-      console.warn("Supabase insert error, saving to local fallback:", error.message);
+      supabase.from("users").insert([savedUser]).then(({ error }) => {
+        if (error) console.warn("Supabase mirror insert failed:", error.message);
+      });
     }
-
-    // Fallback: save to local json file
-    const localUsers = readLocalUsers();
-    // Update if exists, or append
-    const existingIndex = localUsers.findIndex(
-      (u) => u.contact_no && u.contact_no === newUser.contact_no
-    );
-    if (existingIndex >= 0) {
-      localUsers[existingIndex] = { ...localUsers[existingIndex], ...newUser };
-    } else {
-      localUsers.unshift(newUser);
-    }
-    writeLocalUsers(localUsers);
 
     return NextResponse.json({
       success: true,
-      database: isSupabaseConfigured ? "supabase-failed-local-saved" : "local-fallback",
-      user: newUser,
+      database: isSupabaseConfigured ? "supabase" : "sqlite",
+      engine: isSupabaseConfigured
+        ? "Supabase Cloud PostgreSQL"
+        : "SQLite Relational Database",
+      user: savedUser,
     });
   } catch (error: any) {
+    console.error("POST /api/users error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to save user" },
       { status: 500 }
