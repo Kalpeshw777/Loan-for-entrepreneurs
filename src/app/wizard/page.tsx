@@ -472,14 +472,6 @@ export default function WizardPage() {
     setData((previous) => ({
       ...previous,
       earningStatus: status,
-      annualIncome:
-        status === "earning"
-          ? previous.annualIncome
-          : "",
-      incomeProof:
-        status === "earning"
-          ? previous.incomeProof
-          : null,
     }));
   };
 
@@ -995,13 +987,18 @@ export default function WizardPage() {
 
                       {/* Center: Main text */}
                       <div className="flex-1 px-3 sm:px-4 text-center">
-                        <span className="text-base sm:text-xl font-black text-[#0F172A] dark:text-white">
-                          {fetchingDigiLocker
-                            ? "Connecting to DigiLocker..."
-                            : "Continue with DigiLocker"}
-                        </span>
+                        <div className="flex items-center justify-center gap-2">
+                          <span className="text-base sm:text-xl font-black text-[#0F172A] dark:text-white">
+                            {fetchingDigiLocker
+                              ? "Connecting to DigiLocker..."
+                              : "Continue with DigiLocker"}
+                          </span>
+                          <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                            Coming Soon
+                          </span>
+                        </div>
                         <p className="mt-0.5 text-[11px] font-semibold text-[#0369A1] dark:text-[#7DD3FC]">
-                          Fetch verified identity details with DigiLocker
+                          Sandbox OAuth integration in testing • Enter details manually below
                         </p>
                       </div>
 

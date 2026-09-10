@@ -1,4 +1,4 @@
-﻿import { groqChat } from "@/lib/groq";
+import { groqChat } from "@/lib/groq";
 import { SCHEMES } from "@/lib/schemes";
 import type { Profile, Recommendation } from "@/lib/types";
 
@@ -9,7 +9,7 @@ const inr = (n: number) =>
   `₹${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(n)}`;
 
 function fallbackExplanation(profile: Profile, rec: Recommendation): string {
-  const s = SCHEMES[rec.schemeId];
+  const s = SCHEMES[rec.schemeId] || SCHEMES["term-loan"];
   return `Based on your details, the ${rec.schemeName} is the right fit. Your project cost of ${inr(profile.projectCost)} and family income of ${inr(profile.annualIncome)} place you within this scheme's limits. Under it, up to ${s.fundingSharePct}% of your cost (${inr(rec.eligibleAmount)}) can be financed at ${rec.interestRate}% interest with a ${rec.moratoriumMonths}-month grace period before repayment begins. Take this recommendation to a nearby Channel Partner to begin your application.`;
 }
 
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     process.env.GROQ_API_KEY = clientKey;
   }
 
-  const systemPrompt = `You are SchemeSaathi, a helpful assistant explaining Indian government loan schemes for Scheduled Caste (SC) entrepreneurs and students (NSFDC-style schemes). Explain in simple English suitable for a first-generation applicant. Be encouraging but factual — never invent figures beyond what is provided.
+  const systemPrompt = `You are NIRVAAN AI, a helpful assistant explaining Indian government loan and financial assistance schemes for entrepreneurs, MSMEs, and students. Explain in simple English suitable for a first-generation applicant. Be encouraging but factual — never invent figures beyond what is provided.
 
 Scheme facts:
 ${Object.values(SCHEMES)
@@ -77,13 +77,22 @@ Eligibility checks: ${(recommendation.checks ?? [])
     }
   }
 
-  return Response.json({
-    explanation: fallbackExplanation(profile, recommendation),
-    tips: [
-      "Keep your caste certificate, income certificate and Aadhaar ready.",
-      "Collect a detailed project report or admission letter.",
-      "Use the Partner Locator to find a healthy Channel Partner near you.",
-    ],
-    source: "fallback",
-  });
+    const catLower = (profile.category || "").toLowerCase();
+    const catDoc = catLower.includes("sc")
+      ? "Keep your SC caste certificate, domicile, and income certificate ready."
+      : catLower.includes("st")
+      ? "Keep your ST certificate, tribal proof, and domicile ready."
+      : catLower.includes("obc")
+      ? "Keep your OBC Non-Creamy Layer (NCL) certificate and income proof ready."
+      : "Keep your Aadhaar, PAN card, and business address proof ready.";
+
+    return Response.json({
+      explanation: fallbackExplanation(profile, recommendation),
+      tips: [
+        catDoc,
+        "Collect a detailed project report (DPR) or quotation letter.",
+        "Use the Partner Locator to find a healthy partner bank near you.",
+      ],
+      source: "fallback",
+    });
 }

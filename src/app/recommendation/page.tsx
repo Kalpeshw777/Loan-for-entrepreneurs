@@ -406,27 +406,19 @@ export default function RecommendationPage() {
 </p>
                 </div>
 
-                {profile.annualIncome ? (
-                  <div className="p-5">
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797]">
-                      Annual income
-                    </p>
+                <div className="p-5">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797]">
+                    Annual Family Income
+                  </p>
 
-                    <p className="mt-1 text-sm font-extrabold text-[#002244]">
-                      {formatINR(profile.annualIncome)}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="p-5">
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797]">
-                      Assessment
-                    </p>
-
-                    <p className="mt-1 text-sm font-extrabold text-[#002244]">
-                      Non-earning assessment
-                    </p>
-                  </div>
-                )}
+                  <p className="mt-1 text-sm font-extrabold text-[#002244]">
+                    {typeof profile.annualIncome === "number" && profile.annualIncome > 0
+                      ? formatINR(profile.annualIncome)
+                      : profile.annualIncome === 0
+                      ? "₹0 (Non-earning applicant)"
+                      : "Verified under scheme limit"}
+                  </p>
+                </div>
 
                 <div className="p-5">
                   <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797]">

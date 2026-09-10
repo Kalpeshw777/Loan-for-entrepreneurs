@@ -152,14 +152,23 @@ Analyze this applicant thoroughly and return the optimal scheme recommendation i
     }
 
     // High-accuracy expert fallback
-    const s = SCHEMES[baseline.schemeId];
+    const s = SCHEMES[baseline.schemeId] || SCHEMES["term-loan"];
+    const catLower = (profile.category || "").toLowerCase();
+    const docTip = catLower.includes("sc")
+      ? "Keep your SC caste certificate, domicile, and income certificate ready."
+      : catLower.includes("st")
+      ? "Keep your ST certificate, tribal proof, and domicile ready."
+      : catLower.includes("obc")
+      ? "Keep your OBC Non-Creamy Layer (NCL) certificate and income proof ready."
+      : "Keep your Aadhaar, PAN card, and business address proof ready.";
+
     const fallbackRec: Recommendation = {
       ...baseline,
       aiExplanation: `Based on your profile, the ${baseline.schemeName} is your verified match. Your ${profile.activityType} project with an estimated cost of ${inr(profile.projectCost)} and family income of ${inr(profile.annualIncome)} fully meets the government guidelines. Under this program, ${s.fundingSharePct}% (${inr(baseline.eligibleAmount)}) is financed at a concessional ${baseline.interestRate}% reducing balance interest rate with a ${baseline.moratoriumMonths}-month grace period.`,
       aiTips: [
-        "Keep your SC caste certificate, domicile, and income certificate ready.",
+        docTip,
         "Prepare 2-3 equipment/supplier quotations or your Detailed Project Report (DPR).",
-        "Use the Partner Locator to find a nearby authorized PSU Bank or SCA branch with low NPA.",
+        "Use the Partner Locator to find a nearby authorized partner bank branch with low NPA.",
       ],
       source: "fallback",
     };

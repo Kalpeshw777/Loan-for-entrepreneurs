@@ -500,35 +500,6 @@ html[data-theme="dark"] .border-slate-200 {
   border-color: #222b34 !important;
 }
 
-/* -------------------------------------------------------
-   MAPBOX
-------------------------------------------------------- */
-
-.mapboxgl-map {
-  font-family: "Raleway", system-ui, sans-serif;
-}
-
-.mapboxgl-popup-content {
-  border-radius: 0 !important;
-  background: var(--nirvaan-surface);
-  color: var(--nirvaan-text);
-  border: 1px solid var(--nirvaan-border);
-}
-
-.mapboxgl-popup-tip {
-  border-radius: 0 !important;
-}
-
-.mapboxgl-ctrl-group {
-  border-radius: 0 !important;
-  overflow: hidden;
-  background: var(--nirvaan-surface);
-  border: 1px solid var(--nirvaan-border);
-}
-
-.mapboxgl-ctrl-group button {
-  border-radius: 0 !important;
-}
 
 /* -------------------------------------------------------
    SCROLLBAR

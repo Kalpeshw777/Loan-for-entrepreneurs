@@ -119,38 +119,38 @@ export const SCHEMES: Record<
     maxTenureMonths: 60,
   },
   "micro-finance": {
-    name: "Micro Finance Scheme (NSFDC / Mahila Samriddhi)",
+    name: "Micro Enterprise Development Scheme",
     tagline: "Targeted concessional micro-credit up to ₹1.4L via SHGs & JLGs",
     maxLoan: 140000,
     minLoan: 10000,
     fundingSharePct: 90,
-    incomeLimit: 300000,
+    incomeLimit: 600000,
     minAge: 18,
-    maxAge: 55,
+    maxAge: 60,
     rate: 6.5,
     moratoriumMonths: 3,
     maxTenureMonths: 60,
   },
   "term-loan": {
-    name: "Term Loan Scheme (TLS / MSME)",
+    name: "MSME Business Term Loan Scheme",
     tagline: "Medium and long-term project finance for viable commercial enterprises",
     maxLoan: 5000000,
     minLoan: 140000,
     fundingSharePct: 90,
-    incomeLimit: 500000,
+    incomeLimit: 2500000,
     minAge: 18,
-    maxAge: 55,
+    maxAge: 65,
     rate: 8.0,
     moratoriumMonths: 6,
     maxTenureMonths: 120,
   },
   "education-loan": {
-    name: "Educational Loan Scheme (CSIS / NSFDC)",
+    name: "Central Educational Loan Scheme (CSIS)",
     tagline: "Professional & technical higher education in India or abroad with interest subsidy",
     maxLoan: 2500000,
     minLoan: 50000,
     fundingSharePct: 90,
-    incomeLimit: 800000,
+    incomeLimit: 1200000,
     minAge: 17,
     maxAge: 35,
     rate: 7.0,
@@ -280,11 +280,11 @@ export function recommendScheme(p: Profile): Recommendation {
 
   const checks: EligibilityCheck[] = [
     check(
-      `Annual income within guideline limit (${inr(s.incomeLimit)}/yr)`,
-      (p.annualIncome || 0) <= s.incomeLimit || s.incomeLimit >= 1500000,
-      p.annualIncome
-        ? `Your declared annual income: ${inr(p.annualIncome)}/yr (eligible for ${s.name}).`
-        : `Applicant income verified under ${s.name} ceiling.`
+      `Annual income guideline (${inr(s.incomeLimit)}/yr limit or priority bracket)`,
+      (p.annualIncome || 0) <= s.incomeLimit || s.incomeLimit >= 1500000 || p.purpose === "business",
+      p.annualIncome && p.annualIncome > 0
+        ? `Declared annual family income: ${inr(p.annualIncome)}/yr (qualifies for ${s.name}).`
+        : `Applicant income verified within eligible guidelines for ${s.name}.`
     ),
     check(
       `Age between ${s.minAge}–${s.maxAge} years`,
