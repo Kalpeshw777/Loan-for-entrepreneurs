@@ -2,7 +2,6 @@ import fs from "node:fs";
 import path from "node:path";
 
 const DATA_DIR = path.join(process.cwd(), "src", "data");
-const DB_FILE = path.join(DATA_DIR, "loansaathi.sqlite");
 const JSON_FILE = path.join(DATA_DIR, "users.json");
 
 export interface UserRecord {
@@ -28,7 +27,7 @@ export interface UserRecord {
   created_at: string;
 }
 
-const SEED_USERS: UserRecord[] = [
+export const SEED_USERS: UserRecord[] = [
   {
     id: "usr_seed_101",
     full_name: "Rajesh V. Sharma",
@@ -97,161 +96,55 @@ const SEED_USERS: UserRecord[] = [
   },
 ];
 
-let sqlJsModule: any = null;
-let cachedSqlDb: any = null;
+// In-memory cache for serverless runtimes
+let memoryStore: UserRecord[] | null = null;
 
 function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+  } catch {}
 }
 
-function readJsonStore(): UserRecord[] {
+function readStore(): UserRecord[] {
+  if (memoryStore && memoryStore.length > 0) {
+    return memoryStore;
+  }
+
   ensureDataDir();
   try {
     if (fs.existsSync(JSON_FILE)) {
-      const data = fs.readFileSync(JSON_FILE, "utf-8");
-      const list = JSON.parse(data || "[]");
-      if (Array.isArray(list) && list.length > 0) {
-        return list;
+      const raw = fs.readFileSync(JSON_FILE, "utf-8");
+      const parsed = JSON.parse(raw || "[]");
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        memoryStore = parsed;
+        return parsed;
       }
     }
   } catch (err) {
-    console.warn("Could not read JSON database store:", err);
+    console.warn("Could not read persistent database file:", err);
   }
 
-  // If empty, initialize with seed data
-  writeJsonStore(SEED_USERS);
-  return SEED_USERS;
+  // If file doesn't exist or is empty, use seed users
+  memoryStore = [...SEED_USERS];
+  writeStore(memoryStore);
+  return memoryStore;
 }
 
-function writeJsonStore(records: UserRecord[]) {
+function writeStore(records: UserRecord[]) {
+  memoryStore = records;
   ensureDataDir();
   try {
     fs.writeFileSync(JSON_FILE, JSON.stringify(records, null, 2), "utf-8");
   } catch (err) {
-    console.error("Failed to write to JSON database store:", err);
-  }
-}
-
-async function tryInitSqlite(): Promise<any> {
-  if (cachedSqlDb) return cachedSqlDb;
-
-  try {
-    if (!sqlJsModule) {
-      // Dynamic import
-      const initSql = require("sql.js");
-      sqlJsModule = await initSql();
-    }
-
-    ensureDataDir();
-
-    let db: any;
-    if (fs.existsSync(DB_FILE)) {
-      const fileBuffer = fs.readFileSync(DB_FILE);
-      db = new sqlJsModule.Database(fileBuffer);
-    } else {
-      db = new sqlJsModule.Database();
-    }
-
-    db.run(`
-      CREATE TABLE IF NOT EXISTS users (
-        id TEXT PRIMARY KEY,
-        full_name TEXT NOT NULL,
-        contact_no TEXT,
-        email TEXT,
-        dob TEXT,
-        aadhaar TEXT,
-        pan TEXT,
-        state TEXT,
-        district TEXT,
-        category TEXT,
-        purpose TEXT,
-        business_name TEXT,
-        business_type TEXT,
-        business_location TEXT,
-        udyam_no TEXT,
-        gstin_no TEXT,
-        ownership_type TEXT,
-        project_cost REAL,
-        status TEXT DEFAULT 'VERIFIED',
-        created_at TEXT
-      );
-    `);
-
-    // Sync records into sqlite if empty
-    const countRes = db.exec("SELECT COUNT(*) FROM users");
-    const count = countRes[0]?.values[0]?.[0] as number;
-
-    if (!count || count === 0) {
-      const initialUsers = readJsonStore();
-      for (const u of initialUsers) {
-        db.run(
-          `INSERT OR REPLACE INTO users (
-            id, full_name, contact_no, email, dob, aadhaar, pan, state, district, category,
-            purpose, business_name, business_type, business_location, udyam_no, gstin_no,
-            ownership_type, project_cost, status, created_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            u.id,
-            u.full_name,
-            u.contact_no,
-            u.email,
-            u.dob || "",
-            u.aadhaar || "",
-            u.pan || "",
-            u.state,
-            u.district,
-            u.category,
-            u.purpose,
-            u.business_name || "",
-            u.business_type || "",
-            u.business_location || "",
-            u.udyam_no || "",
-            u.gstin_no || "",
-            u.ownership_type || "individual",
-            u.project_cost || 0,
-            u.status || "VERIFIED",
-            u.created_at,
-          ]
-        );
-      }
-      try {
-        const data = db.export();
-        fs.writeFileSync(DB_FILE, Buffer.from(data));
-      } catch {}
-    }
-
-    cachedSqlDb = db;
-    return db;
-  } catch (err) {
-    console.warn("SQLite engine fallback to JSON DB store:", err);
-    return null;
+    // In read-only serverless lambdas, memoryStore retains the data
+    console.warn("Serverless disk write notice (handled via memoryStore):", err);
   }
 }
 
 export async function getAllUsers(): Promise<UserRecord[]> {
-  const sqlDb = await tryInitSqlite();
-
-  if (sqlDb) {
-    try {
-      const res = sqlDb.exec("SELECT * FROM users ORDER BY created_at DESC");
-      if (res.length > 0) {
-        const columns = res[0].columns;
-        return res[0].values.map((row: any[]) => {
-          const obj: any = {};
-          columns.forEach((col: string, idx: number) => {
-            obj[col] = row[idx];
-          });
-          return obj as UserRecord;
-        });
-      }
-    } catch (e) {
-      console.warn("SQLite query failed, falling back to JSON store:", e);
-    }
-  }
-
-  return readJsonStore();
+  return readStore();
 }
 
 export async function insertUser(user: Partial<UserRecord>): Promise<UserRecord> {
@@ -278,55 +171,14 @@ export async function insertUser(user: Partial<UserRecord>): Promise<UserRecord>
     created_at: new Date().toISOString(),
   };
 
-  // 1. Update JSON store
-  const currentRecords = readJsonStore();
-  const existingIdx = currentRecords.findIndex((r) => r.id === newUser.id);
-  if (existingIdx >= 0) {
-    currentRecords[existingIdx] = newUser;
+  const current = readStore();
+  const existingIndex = current.findIndex((u) => u.id === newUser.id);
+  if (existingIndex >= 0) {
+    current[existingIndex] = newUser;
   } else {
-    currentRecords.unshift(newUser);
-  }
-  writeJsonStore(currentRecords);
-
-  // 2. Try updating SQLite DB if active
-  const sqlDb = await tryInitSqlite();
-  if (sqlDb) {
-    try {
-      sqlDb.run(
-        `INSERT OR REPLACE INTO users (
-          id, full_name, contact_no, email, dob, aadhaar, pan, state, district, category,
-          purpose, business_name, business_type, business_location, udyam_no, gstin_no,
-          ownership_type, project_cost, status, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          newUser.id,
-          newUser.full_name,
-          newUser.contact_no,
-          newUser.email,
-          newUser.dob || "",
-          newUser.aadhaar || "",
-          newUser.pan || "",
-          newUser.state,
-          newUser.district,
-          newUser.category,
-          newUser.purpose,
-          newUser.business_name || "",
-          newUser.business_type || "",
-          newUser.business_location || "",
-          newUser.udyam_no || "",
-          newUser.gstin_no || "",
-          newUser.ownership_type || "individual",
-          newUser.project_cost || 0,
-          newUser.status || "VERIFIED",
-          newUser.created_at,
-        ]
-      );
-      const data = sqlDb.export();
-      fs.writeFileSync(DB_FILE, Buffer.from(data));
-    } catch (e) {
-      console.warn("Failed to write to SQLite DB:", e);
-    }
+    current.unshift(newUser);
   }
 
+  writeStore(current);
   return newUser;
 }
