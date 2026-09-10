@@ -16,6 +16,78 @@ const COMMON_DOCS = [
 ];
 
 const SCHEME_DOCS: Record<SchemeId, { title: string; docs: string[] }> = {
+  pmegp: {
+    title: "PMEGP (Prime Minister's Employment Generation Programme) - Additional Requirements",
+    docs: [
+      "Detailed Project Report (DPR) highlighting manufacturing/service process and cash flows",
+      "Rural Area Certificate / Urban Jurisdiction proof (signed by local authority/Sarpanch)",
+      "Special Category / SC / ST / Women Certificate for 25%–35% subsidy claim",
+      "Educational Qualification Certificate (8th pass certificate for project >₹10L Mfg / >₹5L Service)",
+      "EDP (Entrepreneurship Development Programme) 10-day training certificate",
+    ],
+  },
+
+  "mudra-shishu": {
+    title: "PM MUDRA Yojana (Shishu Loan - up to ₹50,000) - Additional Requirements",
+    docs: [
+      "Quotation of machinery/tools/stock to be purchased",
+      "Proof of business address/vending stall permit",
+      "Bank account passbook statement for past 6 months",
+      "Self-declaration of not defaulting with any previous bank",
+    ],
+  },
+
+  "mudra-kishore": {
+    title: "PM MUDRA Yojana (Kishore Loan - ₹50K to ₹5L) - Additional Requirements",
+    docs: [
+      "Last 6 months bank statement showing regular turnover",
+      "Quotations for machinery/capital assets to be acquired",
+      "Trade license / Udyam registration / Shops & Establishment certificate",
+      "Projected sales and expense statement for next 12 months",
+    ],
+  },
+
+  "mudra-tarun": {
+    title: "PM MUDRA Yojana (Tarun Loan - ₹5L to ₹10L) - Additional Requirements",
+    docs: [
+      "Last 12 months audited/certified financial statements or GST returns",
+      "Udyam MSME Registration Certificate",
+      "3 competitive supplier quotations for machinery/equipment",
+      "Proof of existing business operation for at least 1-2 years",
+    ],
+  },
+
+  "standup-india": {
+    title: "Stand-Up India Scheme (SC/ST & Women - ₹10L to ₹1Cr) - Additional Requirements",
+    docs: [
+      "Caste Certificate (SC/ST) or Proof of Woman Entrepreneurship (≥51% equity share)",
+      "Comprehensive Detailed Project Report (DPR) for greenfield enterprise",
+      "Udyam MSME registration and Pollution / Factory clearances (if applicable)",
+      "Proof of 15% borrower contribution (margin money) in designated bank account",
+      "Site lease deed / registered rental agreement or land ownership document",
+    ],
+  },
+
+  cgtmse: {
+    title: "CGTMSE Collateral-Free Credit Scheme - Additional Requirements",
+    docs: [
+      "Techno-Economic Feasibility Report (TEFR) or DPR",
+      "Udyam MSME Registration Certificate",
+      "Last 2 years balance sheet / Income Tax Returns and GST returns",
+      "Board resolution / Partnership deed authorizing loan application",
+    ],
+  },
+
+  "pm-vishwakarma": {
+    title: "PM Vishwakarma Scheme (Artisans & Craftsmen) - Additional Requirements",
+    docs: [
+      "PM Vishwakarma Portal Registration & Skill Verification ID",
+      "Gram Panchayat / Urban Local Body verification acknowledgment",
+      "5–7 days Basic Skill Training completion certificate",
+      "List of artisanal tools or raw material requirements for tool voucher / credit",
+    ],
+  },
+
   "micro-finance": {
     title: "Micro Finance Scheme & Mahila Samriddhi - Additional Requirements",
     docs: [
@@ -50,6 +122,7 @@ const SCHEME_DOCS: Record<SchemeId, { title: string; docs: string[] }> = {
     ],
   },
 };
+
 
 type DocumentItem = {
   id: string;

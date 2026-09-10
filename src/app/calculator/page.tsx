@@ -109,19 +109,12 @@ function CalculatorForm({
   rec?: Recommendation;
 }) {
   const maximumAmount = rec?.eligibleAmount ?? 500000;
+  const minAmount = maximumAmount <= 50000 ? 5000 : maximumAmount <= 100000 ? 10000 : 50000;
 
-  const [amount, setAmount] = useState(() => {
-    const initial = Math.min(
-      maximumAmount,
-      Math.max(50000, Math.floor(maximumAmount / 50000) * 50000)
-    );
+  const [amount, setAmount] = useState(() => maximumAmount);
 
-    return initial;
-  });
-
-  const [rate, setRate] = useState(
-    rec?.interestRate ?? 8
-  );
+  // Interest rate is locked to the official scheme guideline rate
+  const rate = rec?.interestRate ?? 8.0;
 
   const [tenureMonths, setTenureMonths] = useState(
     rec?.maxTenureMonths ?? 60
@@ -181,24 +174,20 @@ function CalculatorForm({
     : rows.slice(0, 12);
 
   /* =======================================================
-     LOAN AMOUNT OPTIONS
+     LOAN AMOUNT PRESETS (Clean & Responsive)
      ======================================================= */
 
-  const loanOptions = useMemo(() => {
-    const options: number[] = [];
+  const loanPresets = useMemo(() => {
+    if (maximumAmount <= 0) return [];
+    const stepUnit = maximumAmount <= 100000 ? 10000 : 50000;
+    const p25 = Math.max(minAmount, Math.round((maximumAmount * 0.25) / stepUnit) * stepUnit);
+    const p50 = Math.max(minAmount, Math.round((maximumAmount * 0.5) / stepUnit) * stepUnit);
+    const p75 = Math.max(minAmount, Math.round((maximumAmount * 0.75) / stepUnit) * stepUnit);
+    const p100 = maximumAmount;
+    return Array.from(new Set([p25, p50, p75, p100])).sort((a, b) => a - b);
+  }, [maximumAmount, minAmount]);
 
-    for (
-      let value = 50000;
-      value <= maximumAmount;
-      value += 50000
-    ) {
-      options.push(value);
-    }
-
-    return options;
-  }, [maximumAmount]);
-
-  const hasLoanOptions = loanOptions.length > 0;
+  const hasLoanOptions = loanPresets.length > 0;
 
   /* =======================================================
      CONTROLS
@@ -268,8 +257,7 @@ function CalculatorForm({
             </h2>
 
             <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
-              Loan amounts are available in ₹50,000
-              increments up to your recommended maximum.
+              Select an indicative amount up to your recommended maximum.
             </p>
           </div>
 
@@ -297,112 +285,87 @@ function CalculatorForm({
                 </div>
               </div>
 
-              {hasLoanOptions ? (
-                <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                  {loanOptions.map((option) => {
-                    const selected = amount === option;
+              {/* Milestone Presets */}
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-bold text-[#667085]">
+                  Quick Presets:
+                </span>
+                {loanPresets.map((preset) => {
+                  const selected = amount === preset;
 
-                    return (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => setAmount(option)}
-                        aria-pressed={selected}
-                        className={`min-h-[46px] border px-3 text-xs font-extrabold transition-colors ${
-                          selected
-                            ? "border-[#0077CC] bg-[#0077CC] text-white"
-                            : "border-[#CBD5E1] bg-white text-[#374151] hover:border-[#0077CC] hover:text-[#0077CC]"
-                        }`}
-                      >
-                        {formatINR(option)}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="mt-5 border border-[#D97706] bg-[#FFFBEB] px-4 py-4">
-                  <p className="text-xs font-bold text-[#92400E]">
-                    No ₹50,000 loan option is available within
-                    the current maximum.
-                  </p>
-                </div>
-              )}
+                  return (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setAmount(preset)}
+                      aria-pressed={selected}
+                      className={`min-h-[38px] border px-3 text-xs font-extrabold transition-colors ${
+                        selected
+                          ? "border-[#0077CC] bg-[#0077CC] text-white"
+                          : "border-[#CBD5E1] bg-white text-[#374151] hover:border-[#0077CC] hover:text-[#0077CC]"
+                      }`}
+                    >
+                      {formatINR(preset)}
+                    </button>
+                  );
+                })}
+              </div>
 
               <input
                 id="loan-amount"
                 type="range"
-                min={hasLoanOptions ? 50000 : 0}
-                max={
-                  hasLoanOptions
-                    ? Math.max(50000, maximumAmount)
-                    : 0
-                }
-                step={50000}
+                min={minAmount}
+                max={maximumAmount}
+                step={maximumAmount <= 100000 ? 5000 : 25000}
                 value={amount}
                 onChange={(event) => {
                   const next = Number(event.target.value);
-
-                  if (
-                    next >= 50000 &&
-                    next <= maximumAmount
-                  ) {
+                  if (next >= minAmount && next <= maximumAmount) {
                     setAmount(next);
                   }
                 }}
                 className="mt-6 h-1.5 w-full cursor-pointer appearance-none bg-[#D7DEE8] accent-[#0077CC]"
                 aria-label="Loan Amount"
-                disabled={!hasLoanOptions}
               />
 
               <div className="mt-2 flex justify-between text-[10px] font-semibold text-[#8A96A6]">
-                <span>
-                  {hasLoanOptions
-                    ? formatINR(50000)
-                    : "Not available"}
-                </span>
-
-                <span>
-                  {hasLoanOptions
-                    ? formatINR(maximumAmount)
-                    : ""}
-                </span>
+                <span>{formatINR(minAmount)}</span>
+                <span>{formatINR(maximumAmount)}</span>
               </div>
             </div>
 
-            {/* INTEREST RATE */}
-            <div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <label
-                  htmlFor="interest-rate"
-                  className="text-sm font-extrabold text-[#002244]"
-                >
-                  Interest Rate
-                </label>
+            {/* INTEREST RATE (LOCKED TO SCHEME) */}
+            <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-extrabold text-[#002244]">
+                      Interest Rate
+                    </span>
+                    <span className="rounded bg-[#E0F2FE] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#0284C7]">
+                      Common as per Scheme
+                    </span>
+                  </div>
 
-                <span className="w-fit border border-[#CBD5E1] bg-white px-3 py-2 text-sm font-extrabold tabular-nums text-[#0077CC]">
-                  {rate}% p.a.
-                </span>
+                  <p className="mt-1 text-[11px] font-medium leading-5 text-[#667085]">
+                    {rec
+                      ? `Locked to official ${rec.schemeName} guideline.`
+                      : "Official baseline concessional rate."}
+                  </p>
+                </div>
+
+                <div className="w-fit border border-[#0077CC] bg-white px-4 py-2">
+                  <span className="text-base font-extrabold tabular-nums text-[#0077CC]">
+                    {rate}% p.a.
+                  </span>
+                </div>
               </div>
 
-              <input
-                id="interest-rate"
-                type="range"
-                min={4}
-                max={18}
-                step={0.5}
-                value={rate}
-                onChange={(event) =>
-                  setRate(Number(event.target.value))
-                }
-                className="mt-4 h-1.5 w-full cursor-pointer appearance-none bg-[#D7DEE8] accent-[#0077CC]"
-                aria-label="Interest Rate"
-              />
-
-              <div className="mt-2 flex justify-between text-[10px] font-semibold text-[#8A96A6]">
-                <span>4%</span>
-                <span>18%</span>
-              </div>
+              <p className="mt-3 text-[11px] font-semibold text-[#047857]">
+                ✓ Reducing balance interest rate is locked per government scheme norms to prevent calculation deviations.
+              </p>
             </div>
+
                         {/* REPAYMENT TENURE */}
             <div>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

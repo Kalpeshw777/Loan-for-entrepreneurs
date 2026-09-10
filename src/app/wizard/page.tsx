@@ -432,32 +432,13 @@ export default function WizardPage() {
     resetMessages();
     setFetchingDigiLocker(true);
     setTimeout(() => {
-      setData((previous) => ({
-        ...previous,
-        fullName: "Ramesh Kumar Patel",
-        contactNo: "9876543210",
-        email: "ramesh.patel@govmail.in",
-        dob: "1998-08-15",
-        age: "28",
-        aadhaar: "548963214785",
-        verificationValue: "548963214785",
-        otpSent: true,
-        verificationComplete: true,
-        pan: "ABCDE1234F",
-        currentAddress: "Plot 233, Sector 4, Gandhinagar",
-        state: "Gujarat",
-        district: "Gandhinagar",
-        pincode: "382004",
-        sameAsPermanent: true,
-        permanentAddress: "Plot 233, Sector 4, Gandhinagar",
-        category: previous.category || "general",
-      }));
       setFetchingDigiLocker(false);
       setNotice(
-        "✓ DigiLocker Verified: Identity, Aadhaar, PAN, and Address details successfully fetched from DigiLocker (Government of India)."
+        "DigiLocker Integration: Coming soon... Government OAuth sandbox testing is underway. Please enter your personal and address details below manually."
       );
-    }, 600);
+    }, 450);
   };
+
 
   const onFileChange = (
     event: ChangeEvent<HTMLInputElement>
@@ -634,6 +615,12 @@ export default function WizardPage() {
         setError("Please enter a valid estimated project cost.");
         return false;
       }
+
+      const income = Number(data.annualIncome);
+      if (!data.annualIncome || !Number.isFinite(income) || income < 0) {
+        setError("Please enter your annual family income.");
+        return false;
+      }
     } else if (data.purpose === "education") {
       if (!data.educationLevel) {
         setError("Please select your education level.");
@@ -655,6 +642,7 @@ export default function WizardPage() {
 
     return true;
   };
+
 
   const nextStep = () => {
     if (step === 0) {
@@ -718,7 +706,7 @@ export default function WizardPage() {
       purpose: (data.purpose || "business") as Profile["purpose"],
       activityType: data.businessType || data.activityType || (data.purpose === "education" ? "Higher Education" : "Small Enterprise"),
       projectCost: Number(data.projectCost) || 0,
-      annualIncome: Number(data.annualIncome) || 250000,
+      annualIncome: Number(data.annualIncome) || 0,
       educationLevel: (data.educationLevel || "graduate") as Profile["educationLevel"],
       courseLocation: (data.courseLocation || "india") as Profile["courseLocation"],
       fullName: data.fullName,
@@ -961,25 +949,15 @@ export default function WizardPage() {
                   {/* Step 01 Top Alerts */}
                   {error ? (
                     <div className="border border-[#D68A8A] bg-[#FFF1F1] px-5 py-4 dark:border-[#743737] dark:bg-[#2A1515]">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#A32929] dark:text-[#F28B8B]">
-                            Action Required to Continue
-                          </p>
-                          <p className="mt-1 text-sm font-medium leading-6 text-[#713333] dark:text-[#E7B1B1]">
-                            {error}
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={handleDigiLockerFetch}
-                          className="flex-none self-start sm:self-auto rounded bg-[#1769D2] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#0F5DBD]"
-                        >
-                          ⚡ Auto-fill Demo Details
-                        </button>
-                      </div>
+                      <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#A32929] dark:text-[#F28B8B]">
+                        Action Required to Continue
+                      </p>
+                      <p className="mt-1 text-sm font-medium leading-6 text-[#713333] dark:text-[#E7B1B1]">
+                        {error}
+                      </p>
                     </div>
                   ) : null}
+
 
                   {notice ? (
                     <div className="border border-[#86B99A] bg-[#ECF8F0] px-5 py-4 dark:border-[#28633C] dark:bg-[#10271A]">
@@ -1641,32 +1619,15 @@ export default function WizardPage() {
                       id="step01-bottom-error"
                       className="border border-[#D68A8A] bg-[#FFF1F1] px-5 py-4 dark:border-[#743737] dark:bg-[#2A1515]"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#A32929] dark:text-[#F28B8B]">
-                            Please complete required details to continue
-                          </p>
-                          <p className="mt-1 text-sm font-medium leading-6 text-[#713333] dark:text-[#E7B1B1]">
-                            {error}
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            handleDigiLockerFetch();
-                            setTimeout(() => {
-                              resetMessages();
-                              setStep(1);
-                              scrollToTop();
-                            }, 700);
-                          }}
-                          className="flex-none self-start sm:self-auto rounded bg-[#1769D2] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#0F5DBD]"
-                        >
-                          ⚡ Auto-fill & Continue to Step 02
-                        </button>
-                      </div>
+                      <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#A32929] dark:text-[#F28B8B]">
+                        Please complete required details to continue
+                      </p>
+                      <p className="mt-1 text-sm font-medium leading-6 text-[#713333] dark:text-[#E7B1B1]">
+                        {error}
+                      </p>
                     </div>
                   ) : null}
+
 
                   {/* =====================================================
                       STEP CONTROL
@@ -2088,9 +2049,54 @@ export default function WizardPage() {
                           NSFDC Micro Finance supports up to ₹1,40,000; Term Loans support up to ₹50,00,000; Stand-Up India up to ₹1 Crore.
                         </p>
                       </div>
+
+                      {/* 8. Annual Family Income */}
+                      <div>
+                        <label
+                          htmlFor="annualIncome"
+                          className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#334155] dark:text-[#CBD5E1]"
+                        >
+                          Annual Family Income (₹) <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[#64748B] dark:text-[#94A3B8]">
+                            ₹
+                          </span>
+                          <input
+                            id="annualIncome"
+                            type="number"
+                            min="0"
+                            value={data.annualIncome}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                              update("annualIncome", e.target.value)
+                            }
+                            placeholder="e.g. 300000"
+                            className="w-full border border-[#C8D4E1] bg-[#F8FAFC] py-3 pl-9 pr-4 text-sm font-medium text-[#1F2937] outline-none transition focus:border-[#1769D2] focus:ring-1 focus:ring-[#1769D2] dark:border-[#344457] dark:bg-[#0B1118] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
+                          />
+                        </div>
+                        <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                          <span className="text-[11px] font-semibold text-[#64748B] dark:text-[#94A3B8]">
+                            Quick presets:
+                          </span>
+                          {[150000, 250000, 350000, 500000, 800000].map((preset) => (
+                            <button
+                              key={preset}
+                              type="button"
+                              onClick={() => update("annualIncome", String(preset))}
+                              className="rounded border border-[#CBD5E1] bg-white px-2.5 py-1 text-[11px] font-bold text-[#334155] transition hover:border-[#1769D2] hover:bg-[#EAF3FD] hover:text-[#1769D2] dark:border-[#344457] dark:bg-[#111923] dark:text-[#CBD5E1] dark:hover:border-[#38BDF8] dark:hover:text-[#38BDF8]"
+                            >
+                              {formatINR(preset)}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="mt-2 text-[11px] text-[#64748B] dark:text-[#94A3B8]">
+                          Annual family income determines your eligibility for government interest subsidies and targeted welfare programs.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ) : null}
+
 
                 {/* =====================================================
                     EDUCATION CONFIGURATION

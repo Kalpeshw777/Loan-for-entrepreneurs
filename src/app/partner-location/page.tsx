@@ -29,10 +29,16 @@ const STATES = [
 
 const SCHEMES: { id: SchemeId | "all"; label: string }[] = [
   { id: "all", label: "All Schemes" },
-  { id: "micro-finance", label: "Micro Finance" },
-  { id: "term-loan", label: "Term Loan" },
-  { id: "education-loan", label: "Education Loan" },
+  { id: "pmegp", label: "PMEGP (Govt Subsidy)" },
+  { id: "mudra-kishore", label: "PM MUDRA (₹50K–₹10L)" },
+  { id: "standup-india", label: "Stand-Up India (SC/ST/Women)" },
+  { id: "cgtmse", label: "CGTMSE (Collateral-Free)" },
+  { id: "pm-vishwakarma", label: "PM Vishwakarma (Artisans 5%)" },
+  { id: "micro-finance", label: "Micro Finance (NSFDC)" },
+  { id: "term-loan", label: "Term Loan (MSME)" },
+  { id: "education-loan", label: "Education Loan (CSIS)" },
 ];
+
 
 function ArrowIcon() {
   return (
@@ -125,7 +131,6 @@ export default function PartnerLocationPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
-  const [showApiGuide, setShowApiGuide] = useState(false);
 
   // Request browser geolocation
   const handleLocateMe = () => {
@@ -225,47 +230,10 @@ export default function PartnerLocationPage() {
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                OpenStreetMap Active (Free / No Key Required)
+                Live Partner Network (198 Verified Branches)
               </span>
-
-              <button
-                type="button"
-                onClick={() => setShowApiGuide(!showApiGuide)}
-                className="rounded border border-[var(--nirvaan-border)] bg-[var(--nirvaan-surface-2)] px-3 py-1 text-xs font-bold text-[var(--nirvaan-blue)] hover:bg-[var(--nirvaan-surface)]"
-              >
-                {showApiGuide ? "✕ Close API Info" : "⚙ Custom Map API Guide"}
-              </button>
             </div>
           </div>
-
-          {/* Expandable API Setup Guide */}
-          {showApiGuide && (
-            <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50/80 p-5 text-slate-800">
-              <h3 className="text-sm font-extrabold text-blue-900">
-                🗺 How to configure Custom Map APIs (Optional)
-              </h3>
-              <p className="mt-1 text-xs text-slate-600">
-                The map currently uses <b>OpenStreetMap</b>, which is 100% free, fully interactive, and works out-of-the-box without requiring any API keys. If you wish to enable high-resolution Mapbox Satellite or Google Maps:
-              </p>
-              <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="rounded border border-blue-200 bg-white p-3">
-                  <p className="text-xs font-bold text-blue-800">Option 1: Mapbox Satellite View</p>
-                  <ol className="mt-1.5 list-inside list-decimal space-y-1 text-[11px] text-slate-600">
-                    <li>Create a free account at <a href="https://account.mapbox.com" target="_blank" rel="noreferrer" className="text-blue-600 underline">mapbox.com</a></li>
-                    <li>Copy your Public Default Token (starts with <code className="bg-slate-100 px-1">pk.ey...</code>)</li>
-                    <li>Add to your <code className="bg-slate-100 px-1">.env.local</code>: <code className="font-mono text-blue-600">NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_token_here</code></li>
-                    <li>Toggle the &quot;Satellite&quot; button on the map!</li>
-                  </ol>
-                </div>
-                <div className="rounded border border-blue-200 bg-white p-3">
-                  <p className="text-xs font-bold text-blue-800">Option 2: Google Maps Direct Routing</p>
-                  <p className="mt-1 text-[11px] text-slate-600 leading-normal">
-                    The <b>&quot;View Route / Get Directions&quot;</b> buttons already utilize Google Maps Direction API links with exact GPS coordinates (<code className="bg-slate-100 px-1">lat, lng</code>) of each bank, meaning users get turn-by-turn navigation directly on mobile and web!
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </section>
 

@@ -3,18 +3,32 @@ import { DISTRICT_COORDS, LOCATIONS } from "@/lib/locations";
 import { haversineKm, healthStatus } from "@/lib/geo";
 import type { Partner, PartnerWithMeta, SchemeId, PartnerType } from "@/lib/types";
 
-const BANK_NAMES = [
-  { name: "State Bank of India", type: "public-sector-bank" as PartnerType, npa: 3.4, schemes: ["micro-finance", "term-loan", "education-loan"] as SchemeId[] },
-  { name: "Bank of India", type: "public-sector-bank" as PartnerType, npa: 4.8, schemes: ["micro-finance", "term-loan", "education-loan"] as SchemeId[] },
-  { name: "Punjab National Bank", type: "public-sector-bank" as PartnerType, npa: 5.2, schemes: ["micro-finance", "term-loan", "education-loan"] as SchemeId[] },
-  { name: "Bank of Baroda", type: "public-sector-bank" as PartnerType, npa: 4.2, schemes: ["micro-finance", "term-loan", "education-loan"] as SchemeId[] },
-  { name: "Canara Bank", type: "public-sector-bank" as PartnerType, npa: 4.9, schemes: ["micro-finance", "term-loan", "education-loan"] as SchemeId[] },
-  { name: "District State SC Development Corp (SCA)", type: "regional-agency" as PartnerType, npa: 2.9, schemes: ["micro-finance", "term-loan"] as SchemeId[] },
-  { name: "HDFC Bank Ltd.", type: "private-bank" as PartnerType, npa: 3.1, schemes: ["micro-finance", "term-loan", "education-loan"] as SchemeId[] },
-  { name: "ICICI Bank Ltd.", type: "private-bank" as PartnerType, npa: 3.5, schemes: ["micro-finance", "term-loan", "education-loan"] as SchemeId[] },
-  { name: "District Central Co-operative Bank", type: "cooperative" as PartnerType, npa: 6.8, schemes: ["micro-finance", "term-loan"] as SchemeId[] },
-  { name: "Mahindra & Mahindra Financial Services", type: "nbfc" as PartnerType, npa: 5.6, schemes: ["micro-finance", "term-loan"] as SchemeId[] },
+const ALL_SCHEMES: SchemeId[] = [
+  "pmegp",
+  "mudra-shishu",
+  "mudra-kishore",
+  "mudra-tarun",
+  "standup-india",
+  "cgtmse",
+  "pm-vishwakarma",
+  "micro-finance",
+  "term-loan",
+  "education-loan",
 ];
+
+const BANK_NAMES = [
+  { name: "State Bank of India", type: "public-sector-bank" as PartnerType, npa: 3.4, schemes: ALL_SCHEMES },
+  { name: "Bank of India", type: "public-sector-bank" as PartnerType, npa: 4.8, schemes: ALL_SCHEMES },
+  { name: "Punjab National Bank", type: "public-sector-bank" as PartnerType, npa: 5.2, schemes: ALL_SCHEMES },
+  { name: "Bank of Baroda", type: "public-sector-bank" as PartnerType, npa: 4.2, schemes: ALL_SCHEMES },
+  { name: "Canara Bank", type: "public-sector-bank" as PartnerType, npa: 4.9, schemes: ALL_SCHEMES },
+  { name: "District State SC Development Corp (SCA)", type: "regional-agency" as PartnerType, npa: 2.9, schemes: ["micro-finance", "term-loan", "standup-india", "pm-vishwakarma"] as SchemeId[] },
+  { name: "HDFC Bank Ltd.", type: "private-bank" as PartnerType, npa: 3.1, schemes: ["cgtmse", "mudra-tarun", "mudra-kishore", "education-loan", "term-loan"] as SchemeId[] },
+  { name: "ICICI Bank Ltd.", type: "private-bank" as PartnerType, npa: 3.5, schemes: ["cgtmse", "mudra-tarun", "mudra-kishore", "education-loan", "term-loan"] as SchemeId[] },
+  { name: "District Central Co-operative Bank", type: "cooperative" as PartnerType, npa: 6.8, schemes: ["micro-finance", "pm-vishwakarma", "mudra-shishu", "mudra-kishore"] as SchemeId[] },
+  { name: "Mahindra & Mahindra Financial Services", type: "nbfc" as PartnerType, npa: 5.6, schemes: ["mudra-shishu", "mudra-kishore", "term-loan"] as SchemeId[] },
+];
+
 
 /**
  * Returns complete official channel partner branches for a specific district.

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Expert AI Advisory Engine for Government Concessional Loan Schemes
  * Ministry of Social Justice and Empowerment, NSFDC, Stand-Up India, PMMY, VCF-SC
  *
@@ -55,7 +55,7 @@ export function generateExpertAiResponse(
     query.includes("kisme apply kare")
   ) {
     const cost = projectAmount ?? 300000;
-    const income = profile?.annualIncome ?? 250000;
+    const income = profile?.annualIncome || 0;
     const age = profile?.age ?? 30;
     const purpose = profile?.purpose ?? "business";
     const activity = profile?.activityType ?? "Enterprise / Trade";

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import type { PartnerWithMeta } from "@/lib/types";
+import PartnerMap from "@/components/PartnerMap";
 
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -400,19 +401,12 @@ export default function MapClient({
 
   if (!process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN) {
     return (
-      <div className="flex h-full min-h-[480px] items-center justify-center border border-[#CBD5E1] bg-[#F8FAFC] p-6 text-center">
-        <div className="max-w-md">
-          <p className="text-sm font-extrabold text-[#002244]">
-            Satellite map is not configured
-          </p>
-
-          <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
-            Add the Mapbox public access token to
-            NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN to
-            enable the interactive satellite map.
-          </p>
-        </div>
-      </div>
+      <PartnerMap
+        partners={partners}
+        selectedId={selectedId}
+        userLocation={userLocation}
+        onSelectPartner={(p) => onSelect(p.id)}
+      />
     );
   }
 

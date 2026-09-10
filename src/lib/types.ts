@@ -1,4 +1,14 @@
-export type SchemeId = "micro-finance" | "term-loan" | "education-loan";
+export type SchemeId =
+  | "pmegp"
+  | "mudra-shishu"
+  | "mudra-kishore"
+  | "mudra-tarun"
+  | "standup-india"
+  | "cgtmse"
+  | "pm-vishwakarma"
+  | "micro-finance"
+  | "term-loan"
+  | "education-loan";
 
 export type PartnerType =
   | "public-sector-bank"

@@ -22,10 +22,18 @@ const MapClient = dynamic(() => import("@/components/MapClient"), {
 });
 
 const SCHEME_LABELS: Record<SchemeId, string> = {
-  "micro-finance": "Micro Finance",
-  "term-loan": "Term Loan",
-  "education-loan": "Education Loan",
+  pmegp: "PMEGP (Govt Subsidy)",
+  "mudra-shishu": "PM MUDRA (Shishu)",
+  "mudra-kishore": "PM MUDRA (Kishore)",
+  "mudra-tarun": "PM MUDRA (Tarun)",
+  "standup-india": "Stand-Up India",
+  cgtmse: "CGTMSE Collateral-Free",
+  "pm-vishwakarma": "PM Vishwakarma (Artisans)",
+  "micro-finance": "Micro Finance (NSFDC)",
+  "term-loan": "Term Loan (MSME)",
+  "education-loan": "Education Loan (CSIS)",
 };
+
 
 const TYPE_LABELS: Record<PartnerType, string> = {
   "public-sector-bank": "PSU Bank",

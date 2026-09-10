@@ -30,34 +30,47 @@ export async function POST(request: Request) {
     const baseline = recommendScheme(profile);
 
     // 2. Try Groq AI (Llama 3.3) for intelligent AI-driven scheme matching and personalized analysis
-    const systemPrompt = `You are SchemeSaathi AI, an authoritative AI financial analyst specialized in Ministry of Social Justice and Empowerment schemes (NSFDC, NSKFDC, Stand-Up India, MUDRA).
+    const systemPrompt = `You are SchemeSaathi AI, an authoritative AI financial analyst specialized in Ministry of MSME, Ministry of Finance, and Ministry of Social Justice schemes (PMEGP, MUDRA, Stand-Up India, CGTMSE, PM Vishwakarma, NSFDC).
 
-Official Verified Scheme Database:
-1. NSFDC Micro Finance Scheme ("micro-finance"):
-   - Cap: ₹1,40,000 | Min: ₹10,000 | Financed: 90% (₹1.26L max) | Margin: 10%
-   - Income limit: ₹3,00,000/yr | Age: 18–55 | Interest: 6.5% p.a. (5.0% for women under Mahila Samriddhi) | Grace: 3 months | Max tenure: 5 years
+Official Verified Scheme Registry:
+1. Prime Minister's Employment Generation Programme ("pmegp"):
+   - Cap: ₹50,00,000 (Mfg) / ₹20,00,000 (Service) | Subsidy: 15% to 35% Govt capital grant
+   - Best for: Manufacturing, agro-processing, food production, renewable energy, workshops.
+   - Interest: ~8.5% p.a. | Grace: 6 months | Max tenure: 7 years
 
-2. NSFDC Term Loan Scheme ("term-loan"):
-   - Cap: ₹50,00,000 | Min: ₹1,40,000 | Financed: 90% | Margin: 10%
-   - Income limit: ₹5,00,000/yr | Age: 18–55
-   - Interest Slabs: ≤₹5L @ 8.0%, ₹5L–₹15L @ 9.5%, ₹15L–₹30L @ 11.0%, >₹30L @ 12.5%
-   - Grace: 6 months | Max tenure: 10 years
+2. PM MUDRA Yojana ("mudra-shishu" up to ₹50K, "mudra-kishore" ₹50K–₹5L, "mudra-tarun" ₹5L–₹10L):
+   - 100% collateral-free bank finance for small businesses, retail shops, traders, artisans, micro-units.
+   - Interest: 7.5%–8.5% p.a. | Grace: 3–6 months | Max tenure: 3–5 years
 
-3. NSFDC Educational Loan Scheme ("education-loan"):
-   - Cap: ₹25,00,000 (India) / ₹40,00,000 (Abroad) | Min: ₹50,000 | Financed: 90%
-   - Income limit: ₹8,00,000/yr | Age: 17–35 | Interest: 7.0% p.a. (6.5% for women)
-   - Grace: Course Duration + 6 Months | Max tenure: 15 years
+3. Stand-Up India Scheme ("standup-india"):
+   - For SC, ST, and Women entrepreneurs setting up greenfield enterprises.
+   - Loan amount: ₹10 Lakhs to ₹1 Crore | 85% project cost coverage.
+   - Interest: ~8.0% p.a. | Grace: 18 months | Max tenure: 7 years
 
-4. Parallel Schemes to consider in alternatives:
-   - Stand-Up India (for greenfield ventures ₹10L–₹1Cr)
-   - PM MUDRA Yojana (Shishu/Kishore/Tarun up to ₹10L)
-   - Venture Capital Fund for SC (VCF-SC up to ₹15Cr)
+4. CGTMSE Collateral-Free Credit Scheme ("cgtmse"):
+   - 100% collateral-free credit guarantee for tech startups, IT, healthcare, and MSMEs up to ₹2 Crore.
+   - Interest: ~8.75% p.a. | Grace: 6 months | Max tenure: 8 years
 
-Evaluate the applicant's profile, select the best scheme, calculate the exact eligible loan amount (up to 90% of cost within cap), verify all eligibility rules, and provide intelligent strategic advice.
+5. PM Vishwakarma Scheme ("pm-vishwakarma"):
+   - For traditional artisans and craftspeople (carpenters, potters, weavers, blacksmiths, tailors).
+   - Loans up to ₹3 Lakhs at subsidized 5.0% interest + ₹15,000 modern toolkit grant.
+   - Interest: 5.0% p.a. | Grace: 3 months | Max tenure: 5 years
+
+6. NSFDC Micro Finance Scheme ("micro-finance"):
+   - Cap: ₹1,40,000 | Concessional 6.5% interest (5.0% for Mahila Samriddhi).
+
+7. NSFDC / MSME Term Loan Scheme ("term-loan"):
+   - Structured commercial project finance up to ₹50,00,000 at 8.0%–12.5%.
+
+8. Educational Loan Scheme ("education-loan"):
+   - Cap: ₹25,00,000 (India) / ₹40,00,000 (Abroad) | Full interest subsidy during moratorium for lower/middle income.
+   - Interest: 7.0% p.a. | Grace: Course Duration + 12 Months | Max tenure: 15 years
+
+Evaluate the applicant's sector, project cost, social category, and needs. Select the optimal scheme matching their profile.
 
 You must respond ONLY with valid JSON in this exact structure:
 {
-  "schemeId": "micro-finance" | "term-loan" | "education-loan",
+  "schemeId": "pmegp" | "mudra-shishu" | "mudra-kishore" | "mudra-tarun" | "standup-india" | "cgtmse" | "pm-vishwakarma" | "micro-finance" | "term-loan" | "education-loan",
   "schemeName": "<Full Official Scheme Name>",
   "tagline": "<Brief scheme summary tagline>",
   "eligibleAmount": <number>,
@@ -69,22 +82,24 @@ You must respond ONLY with valid JSON in this exact structure:
     { "label": "<Check Label>", "passed": <boolean>, "detail": "<Specific reason and comparison>" }
   ],
   "alternatives": [
-    { "schemeId": "micro-finance" | "term-loan" | "education-loan", "reason": "<Actionable strategic suggestion mentioning Stand-Up India or MUDRA if relevant>" }
+    { "schemeId": "pmegp" | "mudra-shishu" | "mudra-kishore" | "mudra-tarun" | "standup-india" | "cgtmse" | "pm-vishwakarma" | "micro-finance" | "term-loan" | "education-loan", "reason": "<Actionable alternative scheme suggestion>" }
   ],
   "aiExplanation": "<3-4 sentence plain-language personalized AI assessment>",
   "aiTips": ["<Next step or strategy 1>", "<Actionable tip 2>", "<Document advice 3>"]
 }`;
 
     const userPrompt = `Applicant Profile:
-- Purpose: ${profile.purpose} (${profile.activityType})
+- Purpose: ${profile.purpose}
+- Business / Activity: ${profile.businessType || profile.activityType}
+- Social Category: ${profile.category || "General"}
+- Ownership Structure: ${profile.ownershipType || "Individual"}
 - Location: ${profile.district}, ${profile.state}
 - Age: ${profile.age} years
-- Education: ${profile.educationLevel}
-- Course Location: ${profile.courseLocation ?? "india"}
 - Declared Project/Course Cost: ${inr(profile.projectCost)}
 - Annual Family Income: ${inr(profile.annualIncome)}/year
 
 Analyze this applicant thoroughly and return the optimal scheme recommendation in JSON.`;
+
 
     let aiResponse: string | null = null;
     try {
@@ -150,7 +165,9 @@ Analyze this applicant thoroughly and return the optimal scheme recommendation i
     };
 
     return Response.json({ recommendation: fallbackRec });
-  } catch {
+  } catch (err) {
+    console.error("Recommend route error:", err);
     return Response.json({ error: "Could not process profile" }, { status: 500 });
   }
 }
+
