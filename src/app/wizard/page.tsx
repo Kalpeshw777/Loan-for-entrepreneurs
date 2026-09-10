@@ -669,6 +669,14 @@ export default function WizardPage() {
       }
 
       resetMessages();
+
+      // Auto-save verified user KYC to Database
+      fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }).catch(() => {});
+
       setStep(1);
       scrollToTop();
       return;
@@ -791,6 +799,13 @@ export default function WizardPage() {
         recommendation:
           json.recommendation,
       });
+
+      // Auto-save complete applicant profile & business data to Database
+      fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(finalProfile),
+      }).catch(() => {});
 
       router.push("/recommendation");
     } catch {
