@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 const LINKS = [
   { href: "/", label: "Home" },
   { href: "/partner-location", label: "Partner Location & Route" },
+  { href: "/admin", label: "Applicant Database" },
   { href: "/how-it-works", label: "How It Works" },
   { href: "/about", label: "About Us" },
 ];
@@ -140,6 +141,10 @@ export default function Header() {
 
     if (href === "/partner-location") {
       return pathname === "/partner-location";
+    }
+
+    if (href === "/admin") {
+      return pathname === "/admin";
     }
 
     if (href === "/how-it-works") {
